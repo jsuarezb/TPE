@@ -81,6 +81,8 @@ void crearAdyacentes(tPunto punto, tPunto adyacentes[]);
 */
 int hayColorAdyacente(tPunto punto, tJuego * juego);
 
-void freeMemory(tJuego * juego);
+void reacomodarTablero(tJuego * juego);
+
+static void correrColumna(int posAnterior, int posNueva, tJuego * juego);
 
 #endif

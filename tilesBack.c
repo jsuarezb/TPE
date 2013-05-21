@@ -23,7 +23,7 @@ crearTablero(tJuego * juego, int nivel)
 		juego->tablero[i] = malloc(juego->ancho * sizeof(char));
 		
 		for (j = 0; j < juego->ancho; j++)
-			juego->tablero[i][j] = rand() % (nivel + 6) + 1;
+			juego->tablero[i][j] = rand() % (nivel + 1) + 1;
 
 	}
 	
@@ -217,15 +217,63 @@ crearAdyacentes(tPunto punto, tPunto adyacentes[])
 	}
 }
 
-void
-freeMemory(tJuego * juego)
+
+void 
+reacomodarTablero( tJuego * juego )
+{
+	int i, j;
+	int ultimaPosX = -1;
+	int ultimaPosY = juego->alto;
+
+	/*
+	** TODO: Hacerlo mas eficiente
+	*/
+
+	for (j = 0; j < juego->ancho; j++) 
+	{
+		imprimirTablero(juego);
+		ultimaPosY = juego->alto - 1;
+		/* Reacomoda los Azulejos para abajo.*/
+		for (i = juego->alto - 1; i >= 0; i--)
+		{
+			if ( juego->tablero[i][j] != 0)
+			{	
+				if (i + 1 < juego->alto && juego->tablero[i+1][j] == 0)
+				{
+					/* Asigna a ultimaPosY el valor i*/
+					juego->tablero[ultimaPosY][j] = juego->tablero[i][j];
+					
+					juego->tablero[i][j] = 0;
+				}
+			
+				ultimaPosY--;
+			}
+		}
+		/* Valida las columnas vacias y reacomoda la matriz.*/
+		if (juego->tablero[juego->alto - 1][j] != 0)
+		{
+			if (j - 1 >= 0 && juego->tablero[juego->alto - 1][j - 1] == 0)
+				correrColumna(j, ultimaPosX + 1, juego);
+
+			ultimaPosX++;
+		}
+	}
+}
+/* Modo de uso: 
+** Reacomoda una columna a la derecha de 
+** la ultima columna no vacia.
+*/ 
+static void 
+correrColumna(int posAnterior, int posNueva, tJuego * juego)
 {
 	int i;
-	
-	for (i = juego->ancho; i; i--)
-		free(juego->tablero[i]);
-	
-	free(juego->tablero);
-	
-	return;	
-}
+
+	for (i = juego->alto-1; i >= 0 && juego->tablero[i][posAnterior] != 0; i--)
+	{
+		juego->tablero[i][posNueva] = juego->tablero[i][posAnterior];
+		juego->tablero[i][posAnterior] = 0;
+	}
+}	
+
+
+

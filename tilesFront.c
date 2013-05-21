@@ -132,13 +132,14 @@ juegoNuevo(tJuego * juego)
 	tPunto nPunto;
 	
 	juego->tablero = crearTablero(juego, 1);
-	nPunto.x = 0;
-	nPunto.y = 0;
+	nPunto.x = 5;
+	nPunto.y = 3;
 	imprimirTablero(juego);
 	printf("Azulejos eliminados: %d\n", eliminar(juego->tablero[nPunto.y][nPunto.x], nPunto, juego));
+	reacomodarTablero(juego);
 	imprimirTablero(juego);
 	
-	//freeMemory(juego);
+
 	
 	return 0;
 }
@@ -165,11 +166,11 @@ imprimirTablero(tJuego * juego)
 	
 	for (i = 0; i < juego->alto; i++)
 	{
-		printf("%d) ", i);
+		printf("\033[0m%d) ", i);
 		for (j = 0; j < juego->ancho; j++)
-			putchar((juego->tablero[i][j] > 0) ? juego->tablero[i][j] + 'A' : ' ');
+			printf("\033[%dm %c", juego->tablero[i][j] + 31, (juego->tablero[i][j] > 0) ? juego->tablero[i][j] + '0' : ' ');
 			
-		putchar('\n');
+		printf("\033[0m\n");
 	}
 }
 

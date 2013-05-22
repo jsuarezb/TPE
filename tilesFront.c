@@ -4,6 +4,7 @@
 #include "tilesBack.h"
 #include "getnum.h"
 #define MIN_DIM 3
+#define VALIDAR_AUX(x) ((x) != ' ' && (x) != '\n')
 
 /* Enums */
 enum {JUEGO_NUEVO = 1, JUEGO_BITACORA, RECUPERAR, TERMINAR};
@@ -132,12 +133,13 @@ juegoNuevo(tJuego * juego)
 	tPunto nPunto;
 	
 	juego->tablero = crearTablero(juego, 1);
-	nPunto.x = 5;
-	nPunto.y = 3;
 	imprimirTablero(juego);
-	printf("Azulejos eliminados: %d\n", eliminar(juego->tablero[nPunto.y][nPunto.x], nPunto, juego));
-	reacomodarTablero(juego);
-	imprimirTablero(juego);
+	while (1 == 1)
+	{
+		verificarJugada(juego);
+		reacomodarTablero(juego);
+		imprimirTablero(juego);
+	}
 	
 
 	
@@ -168,11 +170,102 @@ imprimirTablero(tJuego * juego)
 	{
 		printf("\033[0m%d) ", i);
 		for (j = 0; j < juego->ancho; j++)
-			printf("\033[%dm %c", juego->tablero[i][j] + 31, (juego->tablero[i][j] > 0) ? juego->tablero[i][j] + '0' : ' ');
+			printf("\033[%dm %c", juego->tablero[i][j] + 31, juego->tablero[i][j] + '0');
 			
 		printf("\033[0m\n");
 	}
 }
+
+int
+pedirJugada()
+{
+	char accionAux[6] = {0}, i = 0, j, c, esIgual, len = 0;	
+	char acciones[][5]={"e", "m", "c", "h", "undo", "save", "quit"};
+
+	/* c contiene siempre el último caracter */
+	while ((c = getchar()) != ' ' && c != '\n')
+	{	
+		/* */
+		if (len > 4 && VALIDAR_AUX(c))
+			return 0;	
+						
+		accionAux[len++] = c;
+	}
+
+	/* El argumento leído no tiene longitud 1 ni 4 */
+	if (len != 1 && len != 4)
+		return 0;
+
+	/* Comparación del argumento leído con las acciones válidas */
+	for (i = 0; i < 7; i++)
+	{
+		esIgual = 1;
+		
+		for (j = 0; accionAux[j] != '\0' && esIgual; j++)
+		{
+			/* Basta con un caracter distinto para descartar una opcion */
+			if (acciones[i][j] != accionAux[j])
+				esIgual = 0;
+		}
+		
+		if (esIgual)
+		{
+			/* Validando el save*/
+			if (i == 5 && c != ' ')
+				return 0;
+
+			/* Validando undo y quit */
+			if ((i == 4 || i == 6) && c != '\n')
+				return 0;
+		
+			return i + 1;
+		}
+	}
+
+}
+			
+int
+verificarJugada(tJuego * juego)
+{
+	int x, y, estado, jugada;
+	tPunto punto;
+	
+	enum {ERROR, ELIMINAR, MARTILLAZO, COLUMNA, HILERA, UNDO, SAVE, QUIT};
+
+	do
+	{
+		printf("Ingresar accion:\n");
+		jugada = pedirJugada();
+	} while (jugada != ERROR);
+	
+	switch(jugada)
+	{
+		case ELIMINAR:
+			/* Validacion de unicamente 2 coordenadas sin mas caracteres */
+			if (scanf("%d, %d", &x, &y) == 2) /* TODO: fix validacion */
+			{
+				estado = eliminarWrapper(x, y, juego);
+
+				switch (estado)
+				{
+					case PUNTO_VALIDO:
+						punto.x = x;
+						punto.y = y;
+						eliminar(juego->tablero[y][x], punto, juego);
+						break;
+					case PUNTO_VACIO:
+						printf("El punto elegido esta vacio\n");
+						break;
+					case FUERA_RANGO:
+						printf("El punto elegido no esta dentro del tablero\n");
+						break;
+				}
+			}
+
+			break;
+	}
+}
+
 
 void
 limpiarConsola()

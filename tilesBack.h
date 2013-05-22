@@ -8,6 +8,8 @@
 #ifndef _tilesBack_h
 #define _tilesBack_h
 
+enum {PUNTO_VALIDO, PUNTO_VACIO, FUERA_RANGO};
+
 typedef struct
 {
   int ancho;
@@ -84,5 +86,7 @@ int hayColorAdyacente(tPunto punto, tJuego * juego);
 void reacomodarTablero(tJuego * juego);
 
 static void correrColumna(int posAnterior, int posNueva, tJuego * juego);
+
+int validarPunto(int x, int y, tJuego * juego);
 
 #endif

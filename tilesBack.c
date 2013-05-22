@@ -23,7 +23,7 @@ crearTablero(tJuego * juego, int nivel)
 		juego->tablero[i] = malloc(juego->ancho * sizeof(char));
 		
 		for (j = 0; j < juego->ancho; j++)
-			juego->tablero[i][j] = rand() % (nivel + 1) + 1;
+			juego->tablero[i][j] = rand() % (nivel + 3) + 1;
 
 	}
 	
@@ -65,6 +65,22 @@ eliminar(int color, tPunto punto, tJuego * juego)
 			
 		return 1 + j;
 	}
+}
+
+/*
+**
+*/
+
+int
+validarPunto(int x, int y, tJuego * juego)
+{
+	if (PUNTO_FUERA(x, juego->ancho) || PUNTO_FUERA(y, juego->alto))
+		return FUERA_RANGO;
+
+	if (juego->tablero[y][x] == 0)
+		return PUNTO_VACIO;
+
+	return PUNTO_VALIDO;
 }
 
 /* Elimina la hilera 'hilera' en el tablero de 'juego' */
@@ -231,7 +247,6 @@ reacomodarTablero( tJuego * juego )
 
 	for (j = 0; j < juego->ancho; j++) 
 	{
-		imprimirTablero(juego);
 		ultimaPosY = juego->alto - 1;
 		/* Reacomoda los Azulejos para abajo.*/
 		for (i = juego->alto - 1; i >= 0; i--)

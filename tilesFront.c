@@ -236,7 +236,7 @@ verificarJugada(tJuego * juego)
 	{
 		printf("Ingresar accion:\n");
 		jugada = pedirJugada();
-	} while (jugada != ERROR);
+	} while (jugada == ERROR);
 	
 	switch(jugada)
 	{
@@ -244,7 +244,7 @@ verificarJugada(tJuego * juego)
 			/* Validacion de unicamente 2 coordenadas sin mas caracteres */
 			if (scanf("%d, %d", &x, &y) == 2) /* TODO: fix validacion */
 			{
-				estado = eliminarWrapper(x, y, juego);
+				estado = validarPunto(x, y, juego);
 
 				switch (estado)
 				{

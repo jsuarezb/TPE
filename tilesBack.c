@@ -303,3 +303,45 @@ correrColumna(int posAnterior, int posNueva, tJuego * juego)
 	}
 }	
 
+int
+verificaMatriz(tJuego * juego)
+{
+	int i, j;
+	tPunto punto;	
+
+	
+	if( juego->tablero[juego->alto - 1][0] == 0)
+		return PasaDeNivel;
+
+	for( j = 0; j < juego->ancho; j++)
+	{
+		for( i = juego->alto-1; i >= 0; i--)
+		{
+			punto.x = i;
+			punto.y = j;
+		
+			if(  hayColorAdyacente( punto, juego ) )
+			{
+				printf("Se Puede Seguir Jugando");
+				return SigueJugando;
+			}
+			//validar columnas martillos e hileras
+		}
+	}
+	if ( hayPoderes(juego) )
+		return SigueJugando;
+	else 
+		return GAMEOVER;
+}
+
+int 
+hayPoderes(tJuego * juego)
+{
+	int estado = 0;
+
+	if( juego->movHileras != 0 || juego->movColumnas != 0 || juego->movMartillazos != 0)
+		estado = 1;
+	
+	return estado;
+}
+

@@ -82,7 +82,7 @@ void crearAdyacentes(tPunto punto, tPunto adyacentes[]);
 ** 		// doSomething
 **
 */
-int hayColorAdyacente(tPunto punto, tJuego * juego);
+static int hayColorAdyacente(tPunto punto, tJuego * juego);
 
 void reacomodarTablero(tJuego * juego);
 

@@ -177,7 +177,7 @@ eliminarMartillazo(tPunto punto, tJuego * juego)
 /*
 **
 */
-int
+static int
 hayColorAdyacente(tPunto punto, tJuego * juego)
 {
 	int color, i, hayAdyacente = 0, x, y;

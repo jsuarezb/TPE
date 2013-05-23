@@ -111,9 +111,7 @@ eliminarHilera(int hilera, tJuego * juego)
 		}
 	}
 
-	/*
-	** TODO: Disminuir movimientos eliminarHilera
-	*/
+	juego->movHileras--;
 	
 	return azulejos;
 }
@@ -142,9 +140,7 @@ eliminarColumna(int columna, tJuego * juego)
 		azulejos++;
 	}
 
-	/*
-	** TODO: Disminuir movimientos eliminarHilera
-	*/
+	juego->movColumnas--;
 	
 	return azulejos;
 }
@@ -173,9 +169,7 @@ eliminarMartillazo(tPunto punto, tJuego * juego)
 		}
 	}
 	
-	/*
-	** TODO: Disminuir en uno los movimientos martillazo
-	*/
+	juego->movMartillazos--;
 	
 	return azulejosEliminados;
 }

@@ -181,6 +181,9 @@ imprimirTablero(tJuego * juego)
 {
 	int i, j;
 	
+	printf("Hileras: %d, ", juego->movHileras);
+	printf("Columnas: %d, ", juego->movColumnas);
+	printf("Martillazos: %d\n", juego->movMartillazos);
 	printf("Tablero: \n");
 	
 	/* Imprime la hilera de las posiciones de las columnas */

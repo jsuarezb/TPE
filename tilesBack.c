@@ -45,10 +45,8 @@ eliminar(int color, tPunto punto, tJuego * juego)
 	tPunto puntosAdyacentes[4];
 	
 	/* Validacion del punto */
-	if (PUNTO_FUERA(punto.x, juego->ancho) || PUNTO_FUERA(punto.y, juego->alto) || juego->tablero[punto.y][punto.x] == 0)
-	{
+	if (validarPunto(punto.x, punto.y, juego) != PUNTO_VALIDO)
 		return 0;
-	}
 	
 	/* Eliminacion */
 	if (juego->tablero[punto.y][punto.x] != color)
@@ -83,59 +81,73 @@ validarPunto(int x, int y, tJuego * juego)
 	return PUNTO_VALIDO;
 }
 
-/* Elimina la hilera 'hilera' en el tablero de 'juego' */
+/* Elimina la hilera 'hilera' en el tablero de 'juego' y devuelve la 
+** cantidad de azulejos eliminados
+*/
+
 int
 eliminarHilera(int hilera, tJuego * juego)
 {
-	int i, hayAzulejoVacio = 0;
+	int i, hayAzulejoVacio = 1, azulejos = 0;
 	
 	/* Verifica que al menos un azulejo no este vacio en la hilera */
-	for (i = 0; i < juego->ancho && !hayAzulejoVacio; i++)
+	for (i = 0; i < juego->ancho && hayAzulejoVacio; i++)
 	{
-		if (juego->tablero[hilera][i] == 0)
-		{
-			printf("No es posible eliminar la hilera\n");
-			return 0;
-		}
+		if (juego->tablero[hilera][i] == 1)
+			hayAzulejoVacio = 0;
+			
 	}
 	
+	if (hayAzulejoVacio)
+		return 0;
+		
+		
 	/* Ejecuta la eliminacion de la hilera */
 	for (i = 0; i < juego->ancho; i++)
-		juego->tablero[hilera][i] = 0;
+	{
+		if (juego->tablero[hilera][i] != 0)
+		{
+			juego->tablero[hilera][i] = 0;
+			azulejos++;
+		}
+	}
 
 	/*
 	** TODO: Disminuir movimientos eliminarHilera
 	*/
 	
-	return juego->ancho;
+	return azulejos;
 }
 
 /* Elimina la columna 'columna' en el tablero de 'juego' */
 int
 eliminarColumna(int columna, tJuego * juego)
 {
-	int i, hayAzulejoVacio = 0;
+	int i, azulejos = 0;
 	
-	/* Verifica que no haya un azulejo vacio en la columna */
-	for (i = 0; i < juego->alto && !hayAzulejoVacio; i++)
-	{
-		if (juego->tablero[i][columna] == 0)
-		{	
-			printf("No es posible eliminar la columna\n");
-			printf("Hay un azulejo vacio\n");
+	/* Verifica que el azulejo inferior no esté vacío.
+	 * Tener en cuenta que ya se aplicó la gravedad al tablero
+	 * pasado el movimiento anterior. */
+	printf("Valor de (%d, %d) = %d\n", columna, juego->alto - 1, juego->tablero[juego->alto - 1][columna]);
+	
+	if (juego->tablero[juego->alto - 1][columna] == 0)
 			return 0;
-		}
-	}
-	
-	/* Elimina la columna */
-	for (i = 0; i < juego->alto; i++)
-		juego->tablero[i][columna] = 0;
 		
+	/* Ejecuta la eliminacion de la hilera.
+	 * Es necesario recorrerla toda, ya que el azulejo más
+	 * a la derecha puede ser el único no vacío. */
+	for (i = juego->alto - 1; i >= 0 && juego->tablero[i][columna] != 0; i--)
+	{
+		/* Eliminación de los azulejos no vacios hasta el primer vacío */
+		juego->tablero[i][columna] = 0;
+		azulejos++;
+	}
+
 	/*
-	** TODO: Disminuir movimientos eliminarColumna
+	** TODO: Disminuir movimientos eliminarHilera
 	*/
 	
-	return juego->alto;
+	return azulejos;
 }
 
 /*
@@ -147,11 +159,11 @@ eliminarMartillazo(tPunto punto, tJuego * juego)
 	int i, j, azulejosEliminados = 0;
 	
 	/* Se vacian los alrededores y el centro */
-	for (i = punto.y - 1; i <= punto.y; i++)
+	for (i = punto.y - 1; i <= punto.y + 1; i++)
 	{
 		if (!PUNTO_FUERA(i, juego->alto))
 		{
-			for (j = punto.x - 1; j <= punto.x; j++)
+			for (j = punto.x - 1; j <= punto.x + 1; j++)
 			{
 				if (!PUNTO_FUERA(j, juego->ancho) && juego->tablero[i][j] != 0)
 				{
@@ -248,6 +260,7 @@ reacomodarTablero( tJuego * juego )
 	for (j = 0; j < juego->ancho; j++) 
 	{
 		ultimaPosY = juego->alto - 1;
+		
 		/* Reacomoda los Azulejos para abajo.*/
 		for (i = juego->alto - 1; i >= 0; i--)
 		{
@@ -255,16 +268,16 @@ reacomodarTablero( tJuego * juego )
 			{	
 				if (i + 1 < juego->alto && juego->tablero[i+1][j] == 0)
 				{
-					/* Asigna a ultimaPosY el valor i*/
+					/* Caida de azulejo */
 					juego->tablero[ultimaPosY][j] = juego->tablero[i][j];
-					
 					juego->tablero[i][j] = 0;
 				}
 			
 				ultimaPosY--;
 			}
 		}
-		/* Valida las columnas vacias y reacomoda la matriz.*/
+		
+		/* Movimiento hacia la izquierda de las columnas */
 		if (juego->tablero[juego->alto - 1][j] != 0)
 		{
 			if (j - 1 >= 0 && juego->tablero[juego->alto - 1][j - 1] == 0)
@@ -289,6 +302,4 @@ correrColumna(int posAnterior, int posNueva, tJuego * juego)
 		juego->tablero[i][posAnterior] = 0;
 	}
 }	
-
-
 

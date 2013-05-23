@@ -345,3 +345,15 @@ hayPoderes(tJuego * juego)
 	return estado;
 }
 
+int
+puntos (int azulejosEliminados, tJuego * juego)
+{
+	
+	if(azulejosEliminados <= 5)
+		juego->puntos+=azulejosEliminados;
+	else
+		juego->puntos+=2*azulejosEliminados;
+
+return juego->puntos;
+}
+

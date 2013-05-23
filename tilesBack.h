@@ -9,6 +9,7 @@
 #define _tilesBack_h
 
 enum {PUNTO_VALIDO, PUNTO_VACIO, FUERA_RANGO};
+enum {PROXIMO_NIVEL, SEGUIR_JUGANDO, GAME_OVER};
 
 typedef struct
 {
@@ -34,9 +35,9 @@ typedef struct
 /*
 * Funcion que crea un tablero con las especificaciones dadas
 * de (alto) x (ancho) dimensiones con nivel colores
-* Modo de uso: crearTablero(5, 5, 2, tablero)
+* Modo de uso: crearTablero(juego);
 */ 
-char ** crearTablero(tJuego * juego, int nivel);
+char ** crearTablero(tJuego * juego);
 
 /* Elimina los azulejos adyacentes al punto 'punto' de color '1'
 ** en el tablero de 'juego'

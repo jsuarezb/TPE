@@ -2,9 +2,6 @@
 #include <stdlib.h>
 #include "tilesBack.h"
 #define PUNTO_FUERA(x, y) ((x) < 0 || (x) >= (y))
-#define PasaDeNivel 0
-#define SigueJugando 1
-#define GAMEOVER 2
 
 /* Enums */
 enum {E, H, C, M, UNDO, SAVE, QUIT};
@@ -12,11 +9,10 @@ enum {E, H, C, M, UNDO, SAVE, QUIT};
 /* Funciones */
 
 char **
-crearTablero(tJuego * juego, int nivel)
+crearTablero(tJuego * juego)
 {
-  int i, j;
+	int i, j;
 
-	printf("Creando tablero de %dx%d con %d colores...\n\n", juego->alto, juego->ancho, nivel+1);
 	/* Creacion de filas */
 	juego->tablero = malloc(juego->alto * sizeof(char *));
 	
@@ -26,7 +22,7 @@ crearTablero(tJuego * juego, int nivel)
 		juego->tablero[i] = malloc(juego->ancho * sizeof(char));
 		
 		for (j = 0; j < juego->ancho; j++)
-			juego->tablero[i][j] = rand() % (nivel + 3) + 1;
+			juego->tablero[i][j] = rand() % (juego->nivelActual + 1) + 1;
 
 	}
 	
@@ -196,7 +192,6 @@ hayColorAdyacente(tPunto punto, tJuego * juego)
 	if (juego->tablero[punto.y][punto.x] == 0
 	|| PUNTO_FUERA(punto.x, juego->ancho) || PUNTO_FUERA(punto.y, juego->alto))
 	{
-		printf("La coordenada (%d, %d) no es valida. \n", punto.x, punto.y);
 		return 0;
 	}
 	
@@ -210,7 +205,7 @@ hayColorAdyacente(tPunto punto, tJuego * juego)
 		y = adyacentes[i].y;
 		
 		/* Validacion del punto cuando si no esta dentro del tablero */
-		if (PUNTO_FUERA(x, juego->ancho) && PUNTO_FUERA(y, juego->alto))
+		if (PUNTO_FUERA(x, juego->ancho) || PUNTO_FUERA(y, juego->alto))
 			continue;
 		
 		if (juego->tablero[y][x] == color)
@@ -312,29 +307,30 @@ verificaMatriz(tJuego * juego)
 	int i, j;
 	tPunto punto;	
 
-	
-	if( juego->tablero[juego->alto - 1][0] == 0)
-		return PasaDeNivel;
+	/* Tablero vacio */
+	if (juego->tablero[juego->alto - 1][0] == 0)
+		return PROXIMO_NIVEL;
 
-	for( j = 0; j < juego->ancho; j++)
+	for (j = 0; j < juego->ancho; j++)
 	{
-		for( i = juego->alto-1; i >= 0; i--)
+		for (i = juego->alto-1; i >= 0; i--)
 		{
 			punto.x = i;
 			punto.y = j;
-		
-			if(  hayColorAdyacente( punto, juego ) )
+			
+			/* Es posible seguir jugando */
+			if (hayColorAdyacente(punto, juego ))
 			{
 				printf("Se Puede Seguir Jugando");
-				return SigueJugando;
+				return SEGUIR_JUGANDO;
 			}
 			//validar columnas martillos e hileras
 		}
 	}
-	if ( hayPoderes(juego) )
-		return SigueJugando;
+	if (hayPoderes(juego))
+		return SEGUIR_JUGANDO;
 	else 
-		return GAMEOVER;
+		return GAME_OVER;
 }
 
 int 
@@ -342,21 +338,24 @@ hayPoderes(tJuego * juego)
 {
 	int estado = 0;
 
-	if( juego->movHileras != 0 || juego->movColumnas != 0 || juego->movMartillazos != 0)
+	if(juego->movHileras != 0 || juego->movColumnas != 0 || juego->movMartillazos != 0)
 		estado = 1;
 	
 	return estado;
 }
 
 int
-puntos (int azulejosEliminados, tJuego * juego)
+puntos(int azulejosEliminados, tJuego * juego)
 {
+	/*
+	** TODO: atencion los puntos
+	*/
 	
 	if(azulejosEliminados <= 5)
-		juego->puntos+=azulejosEliminados;
+		juego->puntos += azulejosEliminados;
 	else
-		juego->puntos+=2*azulejosEliminados;
+		juego->puntos += 2 * azulejosEliminados;
 
-return juego->puntos;
+	return juego->puntos;
 }
 

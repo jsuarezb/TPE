@@ -78,7 +78,7 @@ analizarOpcion(int opcion, tJuego * juego)
 {
 	switch (opcion)
 	{
-		case JUEGO_NUEVO:
+		case JUEGO_NUEVO:			
 			pedirDimensiones(juego);
 			pedirNiveles(juego);
 			juegoNuevo(juego);
@@ -130,17 +130,35 @@ pedirNiveles(tJuego * juego)
 int
 juegoNuevo(tJuego * juego)
 {
+	int estadoTablero = PROXIMO_NIVEL;
 	tPunto nPunto;
 	
-	juego->tablero = crearTablero(juego, 1);
+	/* Crear un tJuego para el juego nuevo seteando todas sus 
+	 * variables a los valores iniciales */
+	juego->puntos = 0;
+	/* Siendo 1 el primer nivel (aumenta al crear tablero nuevo) */
+	juego->nivelActual = 0; 
+	juego->movHileras = 1;
+	juego->movColumnas = 1;
+	juego->movMartillazos = 1;
 	
-	imprimirTablero(juego);
-	
-	while (1) // TODO: Reemplazar 1 por checkearTablero()
+	while (estadoTablero != GAME_OVER) // TODO: Reemplazar 1 por checkearTablero()
 	{
-		verificarJugada(juego);
-		reacomodarTablero(juego);
+		/* Pasar al proximo nivel */
+		if (estadoTablero == PROXIMO_NIVEL)
+		{
+			limpiarConsola();
+			
+			juego->nivelActual++;
+			
+			printf("Nivel %d\n", juego->nivelActual);
+			juego->tablero = crearTablero(juego);
+		}
+		
 		imprimirTablero(juego);
+		hacerJugada(juego);
+		reacomodarTablero(juego);
+		estadoTablero = verificaMatriz(juego);
 	}
 	
 	return 0;
@@ -240,7 +258,7 @@ pedirJugada()
 }
 			
 int
-verificarJugada(tJuego * juego)
+hacerJugada(tJuego * juego)
 {
 	int estado, jugada, argumentos, azulejosEliminados = 0;
 	tPunto punto;
@@ -253,37 +271,37 @@ verificarJugada(tJuego * juego)
 		jugada = pedirJugada();
 	} while (jugada == ERROR);
 	
-	switch(jugada)
-	{
-		case ELIMINAR:
-			azulejosEliminados = eliminarWrapper(juego);
+		switch(jugada)
+		{
+			case ELIMINAR:
+				azulejosEliminados = eliminarWrapper(juego);
+				break;
+			case MARTILLAZO:
+				azulejosEliminados = martillazoWrapper(juego);
+				break;
+			case COLUMNA:
+				azulejosEliminados = columnaWrapper(juego);
+				break;
+			case HILERA:
+				azulejosEliminados = hileraWrapper(juego);
+				break;
+			case UNDO:
 			
-			break;
-		case MARTILLAZO:
-			azulejosEliminados = martillazoWrapper(juego);
+				break;
+			case SAVE:
 			
-			break;
-		case COLUMNA:
-			azulejosEliminados = columnaWrapper(juego);
-			break;
-		case HILERA:
-			azulejosEliminados = hileraWrapper(juego);
-			break;
-		case UNDO:
-			azulejosEliminados = columnaWrapper(juego);
-			break;
-		case SAVE:
-		
-			break;
-		case QUIT:
-			
-			break;
-		default:
-			printf("Jugada no reconocida\n");
-			break;
-	}
+				break;
+			case QUIT:
+				// Retorna
+				break;
+			default:
+				printf("Jugada no reconocida\n");
+				break;
+		}
 	
 	printf("Azulejos eliminados: %d\n", azulejosEliminados);
+	
+	return azulejosEliminados;
 }
 
 int
@@ -292,7 +310,7 @@ eliminarWrapper(tJuego * juego)
 	int x, y, argumentos = 0, estado, azulejosEliminados;
 	tPunto punto;
 	
-	argumentos = scanf("%d, %d", &x, &y);
+	argumentos = scanf("%d, %d", &y, &x);
 	
 	if (argumentos == 2) /* TODO: fix validacion */
 	{

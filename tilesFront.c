@@ -133,15 +133,15 @@ juegoNuevo(tJuego * juego)
 	tPunto nPunto;
 	
 	juego->tablero = crearTablero(juego, 1);
+	
 	imprimirTablero(juego);
-	while (1 == 1)
+	
+	while (1) // TODO: Reemplazar 1 por checkearTablero()
 	{
 		verificarJugada(juego);
 		reacomodarTablero(juego);
 		imprimirTablero(juego);
 	}
-	
-
 	
 	return 0;
 }
@@ -163,12 +163,27 @@ imprimirTablero(tJuego * juego)
 {
 	int i, j;
 	
-	printf("El tablero es el siguiente: \n");
-	printf("Ancho: %d\nAlto: %d\n", juego->ancho, juego->alto);
+	printf("Tablero: \n");
+	
+	/* Imprime la hilera de las posiciones de las columnas */
+	printf("  ");
+	
+	for (i = 0; i < juego->ancho; i++)
+	{
+		if (i % 2 == 0)
+			(i < 10) ? printf(" %d", i) : printf("%d", i);
+		else
+			printf("  ");
+	}
+	
+	putchar('\n');
 	
 	for (i = 0; i < juego->alto; i++)
 	{
-		printf("\033[0m%d) ", i);
+		/* Imprime la columna de las posiciones de las hileras */
+		(i < 10) ? printf("\033[0m %d", i) : printf("\033[0m%d", i);
+		
+		/* Imprime los valores del tablero */
 		for (j = 0; j < juego->ancho; j++)
 			printf("\033[%dm %c", juego->tablero[i][j] + 31, juego->tablero[i][j] + '0');
 			
@@ -188,7 +203,7 @@ pedirJugada()
 		/* */
 		if (len > 4 && VALIDAR_AUX(c))
 			return 0;	
-						
+	
 		accionAux[len++] = c;
 	}
 
@@ -227,7 +242,7 @@ pedirJugada()
 int
 verificarJugada(tJuego * juego)
 {
-	int x, y, estado, jugada;
+	int estado, jugada, argumentos, azulejosEliminados = 0;
 	tPunto punto;
 	
 	enum {ERROR, ELIMINAR, MARTILLAZO, COLUMNA, HILERA, UNDO, SAVE, QUIT};
@@ -241,31 +256,137 @@ verificarJugada(tJuego * juego)
 	switch(jugada)
 	{
 		case ELIMINAR:
-			/* Validacion de unicamente 2 coordenadas sin mas caracteres */
-			if (scanf("%d, %d", &x, &y) == 2) /* TODO: fix validacion */
-			{
-				estado = validarPunto(x, y, juego);
-
-				switch (estado)
-				{
-					case PUNTO_VALIDO:
-						punto.x = x;
-						punto.y = y;
-						eliminar(juego->tablero[y][x], punto, juego);
-						break;
-					case PUNTO_VACIO:
-						printf("El punto elegido esta vacio\n");
-						break;
-					case FUERA_RANGO:
-						printf("El punto elegido no esta dentro del tablero\n");
-						break;
-				}
-			}
-
+			azulejosEliminados = eliminarWrapper(juego);
+			
+			break;
+		case MARTILLAZO:
+			azulejosEliminados = martillazoWrapper(juego);
+			
+			break;
+		case COLUMNA:
+			azulejosEliminados = columnaWrapper(juego);
+			break;
+		case HILERA:
+			azulejosEliminados = hileraWrapper(juego);
+			break;
+		case UNDO:
+			azulejosEliminados = columnaWrapper(juego);
+			break;
+		case SAVE:
+		
+			break;
+		case QUIT:
+			
+			break;
+		default:
+			printf("Jugada no reconocida\n");
 			break;
 	}
+	
+	printf("Azulejos eliminados: %d\n", azulejosEliminados);
 }
 
+int
+eliminarWrapper(tJuego * juego)
+{
+	int x, y, argumentos = 0, estado, azulejosEliminados;
+	tPunto punto;
+	
+	argumentos = scanf("%d, %d", &x, &y);
+	
+	if (argumentos == 2) /* TODO: fix validacion */
+	{
+		estado = validarPunto(x, y, juego);
+
+		switch (estado)
+		{
+			case PUNTO_VALIDO:
+				punto.x = x;
+				punto.y = y;
+				azulejosEliminados = eliminar(juego->tablero[y][x], punto, juego);
+				break;
+			case PUNTO_VACIO:
+				printf("El punto (%d, %d) esta vacio\n", x, y);
+				break;
+			case FUERA_RANGO:
+				printf("El punto (%d, %d) no esta dentro del tablero\n",  x, y);
+				break;
+		}
+	}
+	
+	return azulejosEliminados;
+}
+
+int
+hileraWrapper(tJuego * juego)
+{
+	int y, argumentos, azulejosEliminados = 0, estado;
+	
+	argumentos = scanf("%d", &y);
+	
+	if (argumentos == 1)
+	{
+		azulejosEliminados = eliminarHilera(y, juego);
+		
+		if (azulejosEliminados == 0)
+			printf("Imposible eliminar la fila %d\n", y);
+	
+	}
+	
+	return azulejosEliminados;
+}
+
+int
+columnaWrapper(tJuego * juego)
+{
+	int x, argumentos, azulejosEliminados = 0;
+	
+	argumentos = scanf("%d", &x);
+	
+	if (argumentos == 1)
+	{
+		printf("Antes de columna\n");
+		azulejosEliminados = eliminarColumna(x, juego);
+		
+		if (azulejosEliminados == 0)
+			printf("Imposible eliminar la columna %d\n", x);
+	
+	}
+	
+	return azulejosEliminados;
+}
+
+int
+martillazoWrapper(tJuego * juego)
+{
+	int x, y, argumentos = 0, estado, azulejosEliminados;
+	tPunto punto;
+	
+	argumentos = scanf("%d, %d", &x, &y);
+	
+			
+	if (argumentos == 2)
+	{
+		estado = validarPunto(x, y, juego);
+		
+		switch (estado)
+		{
+			case PUNTO_VALIDO:
+				punto.x = x;
+				punto.y = y;
+				azulejosEliminados = eliminarMartillazo(punto, juego);
+				break;
+			case PUNTO_VACIO:
+				printf("El punto (%d, %d) esta vacio\n", x, y);
+				break;
+			case FUERA_RANGO:
+				printf("El punto (%d, %d) no esta dentro del tablero\n",  x, y);
+				break;
+		}
+	}
+	
+	return azulejosEliminados;
+}
 
 void
 limpiarConsola()

@@ -89,4 +89,8 @@ static void correrColumna(int posAnterior, int posNueva, tJuego * juego);
 
 int validarPunto(int x, int y, tJuego * juego);
 
+int verificaMatriz(tJuego * juego);
+
+int hayPoderes(tJuego * juego);
+
 #endif

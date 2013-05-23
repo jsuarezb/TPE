@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include "tilesBack.h"
 #define PUNTO_FUERA(x, y) ((x) < 0 || (x) >= (y))
+#define PasaDeNivel 0
+#define SigueJugando 1
+#define GAMEOVER 2
 
 /* Enums */
 enum {E, H, C, M, UNDO, SAVE, QUIT};

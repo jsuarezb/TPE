@@ -93,4 +93,6 @@ int verificaMatriz(tJuego * juego);
 
 int hayPoderes(tJuego * juego);
 
+int puntos(int azulejosEliminados, tJuego * juego);
+
 #endif

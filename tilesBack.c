@@ -186,8 +186,8 @@ hayColorAdyacente(tPunto punto, tJuego * juego)
 	int color, i, hayAdyacente = 0, x, y;
 	tPunto adyacentes[4];
 	
-	if (juego->tablero[punto.y][punto.x] == 0
-	|| PUNTO_FUERA(punto.x, juego->ancho) || PUNTO_FUERA(punto.y, juego->alto))
+	if (PUNTO_FUERA(punto.x, juego->ancho) || PUNTO_FUERA(punto.y, juego->alto)
+	|| juego->tablero[punto.y][punto.x] == 0)
 	{
 		return 0;
 	}

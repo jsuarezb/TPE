@@ -32,6 +32,13 @@ typedef struct
 	int y;
 } tPunto;
 
+typedef struct
+{
+	tPunto punto;
+	int azulejosEliminados;
+} tJugada;
+
+
 /*
 * Funcion que crea un tablero con las especificaciones dadas
 * de (alto) x (ancho) dimensiones con nivel colores
@@ -82,7 +89,7 @@ void crearAdyacentes(tPunto punto, tPunto adyacentes[]);
 ** 		// doSomething
 **
 */
-static int hayColorAdyacente(tPunto punto, tJuego * juego);
+int hayColorAdyacente(tPunto punto, tJuego * juego);
 
 void reacomodarTablero(tJuego * juego);
 

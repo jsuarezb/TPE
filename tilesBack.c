@@ -445,7 +445,7 @@ initJuego(tJuego * juego)
 }
 
 void
-liberarTabler()
+liberarTablero()
 {
 	
 }

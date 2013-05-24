@@ -9,6 +9,7 @@
 
 /* Enums */
 enum {JUEGO_NUEVO = 1, JUEGO_BITACORA, RECUPERAR, TERMINAR};
+enum {ERROR, ELIMINAR, MARTILLAZO, COLUMNA, HILERA, UNDO, SAVE, QUIT};
 
 /* Structs */
 
@@ -22,8 +23,8 @@ void imprimirTablero(tJuego * juego);
 int menuNuevo(); // Crea menu nuevo y devuelve opcion elegida
 int comenzarJuego(); // Comienza el juego
 int juegoNuevo();
-int juegoBitacora();
 int recuperar();
+int hacerJugada(tJuego * juego);
 tJugada eliminarWrapper(tJuego * juego);
 tJugada columnaWrapper(tJuego * juego);
 tJugada hileraWrapper(tJuego * juego);
@@ -84,16 +85,19 @@ analizarOpcion(int opcion, tJuego * juego)
 {
 	switch (opcion)
 	{
-		case JUEGO_NUEVO:			
+		case JUEGO_NUEVO:
+			juego->conBitacora = 0;
+			
 			pedirDimensiones(juego);
 			pedirNiveles(juego);
 			juegoNuevo(juego);
 			break;
 		case JUEGO_BITACORA:
-			juego->conBitacora=1;
+			juego->conBitacora = 1;
+			
 			pedirDimensiones(juego);
 			pedirNiveles(juego);
-			juegoNuevo(juego);/**/
+			juegoNuevo(juego);
 			break;
 		case RECUPERAR:
 			recuperar();
@@ -130,17 +134,17 @@ pedirNiveles(tJuego * juego)
 	int niveles;
 	
 	niveles = getint("Ingresar niveles: ");
-	while (niveles >= (juego->alto * juego->ancho / 2) || niveles <= 8)
+	
+	while (niveles > 8)
 		niveles = getint("Volver a ingresar niveles: ");
 		
-	juego->niveles = niveles;
+	juego->nivelMaximo = niveles;
 }
 
 int
 juegoNuevo(tJuego * juego)
 {
-	int estadoTablero = PROXIMO_NIVEL;
-	tPunto nPunto;
+	int estadoTablero = PROXIMO_NIVEL, pts;
 	
 	/* Crear un tJuego para el juego nuevo seteando todas sus 
 	 * variables a los valores iniciales */
@@ -160,30 +164,30 @@ juegoNuevo(tJuego * juego)
 			
 			juego->nivelActual++;
 			
+			/* Validacion del ultimo nivel */
+			if (juego->nivelActual >= juego->nivelMaximo)
+				return VICTORIA;
+			
 			printf("Nivel %d\n", juego->nivelActual);
 			juego->tablero = crearTablero(juego);
 		}
 		
 		imprimirTablero(juego);
-		puntos(hacerJugada(juego),juego);
-		//hacerJugada(juego);
+		
+		pts = hacerJugada(juego);
+		calcularPuntos(pts, juego);
 		reacomodarTablero(juego);
+		
 		estadoTablero = verificaMatriz(juego);
 	}
 	
-	return 0;
-}
-
-int
-juegoBitacora()
-{
-	
-	return 0;
+	return GAME_OVER;
 }
 
 int
 recuperar()
 {
+	
 	return 0;
 }
 
@@ -223,8 +227,9 @@ imprimirTablero(tJuego * juego)
 int
 pedirJugada()
 {
-	char accionAux[6] = {0}, i = 0, j, c, esIgual, len = 0;	
+	char accionAux[6] = {0}, esIgual;	
 	char acciones[][5]={"e", "m", "c", "h", "undo", "save", "quit"};
+	int len = 0, j, c, i = 0;
 
 	/* c contiene siempre el último caracter */
 	while ((c = getchar()) != ' ' && c != '\n')
@@ -265,63 +270,65 @@ pedirJugada()
 			return i + 1;
 		}
 	}
-
+	
+	/* Si se llega hasta este punto la funcion no reconocio el comando */
+	return 0;
 }
 
-/*char
-acciones(int jugadaValidada)
-{
-	char accion[4] = {"emch"};
-	return accion[jugadaValidada-1];
-}*/
-			
 int
 hacerJugada(tJuego * juego)
 {
-	int estado, jugadaValidada, argumentos, azulejosEliminados = 0;
+	char accion[4] = {"emch"};
+	int jugadaValidada;
 	tJugada jugada;
 	
-	enum {ERROR, ELIMINAR, MARTILLAZO, COLUMNA, HILERA, UNDO, SAVE, QUIT};
-
 	do
 	{
 		printf("Ingresar accion:\n");
 		jugadaValidada = pedirJugada();
-		if (juego->conBitacora)
-		{
-			char accion[4] = {"emch"};
-			printf("%c %d, %d;%d \n", accion[jugadaValidada-1], jugada.punto.x, jugada.punto.y, jugada.azulejosEliminados);
-		}
 	} while (jugadaValidada == ERROR);
 	
-		switch(jugadaValidada)
-		{
-			case ELIMINAR:
-				jugada = eliminarWrapper(juego);
-				break;
-			case MARTILLAZO:
-				jugada = martillazoWrapper(juego);
-				break;
-			case COLUMNA:
-				jugada = columnaWrapper(juego);
-				break;
-			case HILERA:
-				jugada = hileraWrapper(juego);
-				break;
-			case UNDO:
-			
-				break;
-			case SAVE:
-			
-				break;
-			case QUIT:
-				// Retorna
-				break;
-			default:
-				printf("Jugada no reconocida\n");
-				break;
-		}
+	switch(jugadaValidada)
+	{
+		case ELIMINAR:
+			jugada = eliminarWrapper(juego);
+			break;
+		case MARTILLAZO:
+			jugada = martillazoWrapper(juego);
+			break;
+		case COLUMNA:
+			jugada = columnaWrapper(juego);
+			break;
+		case HILERA:
+			jugada = hileraWrapper(juego);
+			break;
+		case UNDO:
+		
+			break;
+		case SAVE:
+		
+			break;
+		case QUIT:
+			// Retorna
+			break;
+		default:
+			printf("Jugada no reconocida\n");
+			break;
+	}
 	
+	if (juego->conBitacora && jugada.azulejosEliminados > 0)
+	{
+		printf("%c ", accion[jugadaValidada - 1]);
+		
+		/* Si es necesario imprimir dos coordenadas */
+		if (jugada.punto.x != -1 && jugada.punto.y != -1)
+			printf("%d, %d", jugada.punto.x, jugada.punto.y);
+		else
+			printf("%d", jugada.punto.x < 0 ? jugada.punto.x : jugada.punto.y);
+
+		printf("; %d \n", jugada.azulejosEliminados);
+	}
+		
 	printf("Azulejos eliminados: %d\n", jugada.azulejosEliminados);
 	
 	return jugada.azulejosEliminados;
@@ -330,9 +337,10 @@ hacerJugada(tJuego * juego)
 tJugada
 eliminarWrapper(tJuego * juego)
 {
-	int x, y, argumentos = 0, estado, azulejosEliminados;
-	
+	int x, y, argumentos = 0, estado;
 	tJugada jugada;
+	
+	jugada.azulejosEliminados = 0;
 	
 	argumentos = scanf("%d, %d", &y, &x);
 	
@@ -362,20 +370,22 @@ eliminarWrapper(tJuego * juego)
 tJugada
 hileraWrapper(tJuego * juego)
 {
+	int y, argumentos;
 	tJugada jugada;
-	int y, argumentos, estado;
+	
+	jugada.azulejosEliminados = 0;
 	
 	argumentos = scanf("%d", &y);
 	
 	if (argumentos == 1)
 	{
 		jugada.punto.x = -1; //Indicando que no hay coordenada X 
-		jugada.punto.y = y;
+		jugada.punto.y = y; /** TODO: fix */
 		jugada.azulejosEliminados = eliminarHilera(y, juego);
 		
 		if (jugada.azulejosEliminados == 0)
 			printf("Imposible eliminar la fila %d\n", y);
-	
+
 	}
 	
 	return jugada;
@@ -384,8 +394,10 @@ hileraWrapper(tJuego * juego)
 tJugada
 columnaWrapper(tJuego * juego)
 {
-	tJugada jugada;
 	int x, argumentos;
+	tJugada jugada;
+	
+	jugada.azulejosEliminados = 0;
 	
 	argumentos = scanf("%d", &x);
 	
@@ -407,12 +419,13 @@ columnaWrapper(tJuego * juego)
 tJugada
 martillazoWrapper(tJuego * juego)
 {
-	int x, y, argumentos = 0, estado, azulejosEliminados;
+	int x, y, argumentos = 0, estado;
 	tJugada jugada;
 	
-	argumentos = scanf("%d, %d", &x, &y);
+	jugada.azulejosEliminados = 0;
 	
-			
+	argumentos = scanf("%d, %d", &y, &x);
+	
 	if (argumentos == 2)
 	{
 		estado = validarPunto(x, y, juego);
@@ -440,7 +453,7 @@ void
 guardarWrapper(tJuego * juego)
 {
 	char * nombreArchivo = calloc(MAX_NOMBRE, sizeof(char)), c;
-	int i, estado, argumentos;
+	int i, estado;
 	
 	/* Validacion del nombre del archivo */
 	while ((c = getchar()) != '\n')

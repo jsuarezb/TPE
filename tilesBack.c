@@ -8,6 +8,8 @@ enum {E, H, C, M, UNDO, SAVE, QUIT};
 
 /* Funciones */
 
+static void correrColumna(int posAnterior, int posNueva, tJuego * juego);
+
 char **
 crearTablero(tJuego * juego)
 {
@@ -345,12 +347,17 @@ hayPoderes(tJuego * juego)
 }
 
 int
-puntos(int azulejosEliminados, tJuego * juego)
+calcularPuntos(int azulejosEliminados, tJuego * juego)
 {
 	/*
-	** TODO: atencion los puntos
+	** TODO: atencion a nuevo aviso para calcular puntos
 	*/
 	
+	/* TODO: es posible calcular para n <= 5 el puntaje real con:
+	 * resp = 2 ^ (n - 2) pero es necesario incluir math.h
+	 * ver si es posible de acuerdo a la catedra incluir la biblioteca
+	 * o hacer una funcion potencia(base, exp);
+	 */
 	if(azulejosEliminados <= 5)
 		juego->puntos += azulejosEliminados;
 	else

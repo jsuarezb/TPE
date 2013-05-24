@@ -9,13 +9,12 @@
 #define _tilesBack_h
 
 enum {PUNTO_VALIDO, PUNTO_VACIO, FUERA_RANGO};
-enum {PROXIMO_NIVEL, SEGUIR_JUGANDO, GAME_OVER};
+enum {PROXIMO_NIVEL, SEGUIR_JUGANDO, GAME_OVER, VICTORIA};
 
 typedef struct
 {
   int ancho;
 	int alto;
-	int niveles;
 	int nivelMaximo;
 	int nivelActual;
 	int puntos;
@@ -69,6 +68,9 @@ int eliminarHilera(int hilera, tJuego * juego);
 */
 int eliminarColumna(int columna, tJuego * juego);
 
+/* */
+int eliminarMartillazo(tPunto punto, tJuego * juego);
+
 /*
 ** Crea un arreglo de puntos adyacentes al punto dado
 ** Modo de uso:
@@ -93,15 +95,13 @@ int hayColorAdyacente(tPunto punto, tJuego * juego);
 
 void reacomodarTablero(tJuego * juego);
 
-static void correrColumna(int posAnterior, int posNueva, tJuego * juego);
-
 int validarPunto(int x, int y, tJuego * juego);
 
 int verificaMatriz(tJuego * juego);
 
 int hayPoderes(tJuego * juego);
 
-int puntos(int azulejosEliminados, tJuego * juego);
+int calcularPuntos(int azulejosEliminados, tJuego * juego);
 
 int guardarJuego(char * nombreArchivo, tJuego * juego);
 

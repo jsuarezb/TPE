@@ -445,6 +445,40 @@ initJuego(tJuego * juego)
 }
 
 void
+leerArchivo(FILE * partidaGuardada, tJuego * juego)
+{	
+	int i, j;
+	char c;
+	
+	/* Escritura de datos basicos */
+	
+	fread(&juego->alto, sizeof(int), 1, partidaGuardada); /* Filas */
+	fread(&juego->ancho, sizeof(int), 1, partidaGuardada); /* Columnas */
+	fread(&juego->nivelMaximo, sizeof(int), 1, partidaGuardada);
+	fread(&juego->conBitacora, sizeof(char), 1, partidaGuardada);
+	fread(&juego->nivelActual, sizeof(int), 1, partidaGuardada);
+	fread(&juego->puntos, sizeof(int), 1, partidaGuardada);
+	fread(&juego->movHileras, sizeof(int), 1, partidaGuardada);
+	fread(&juego->movColumnas, sizeof(int), 1, partidaGuardada);
+	fread(&juego->movMartillazos, sizeof(int), 1, partidaGuardada);
+
+	juego->tablero = crearTablero(juego);
+
+	for (i = 0; i < juego->alto; i++)
+	{
+		for (j = 0; j < juego->ancho; j++)
+		{
+			c = fgetc(partidaGuardada);
+			juego->tablero[i][j] = c - 'A' + 1;
+		}
+	}
+
+	fclose(partidaGuardada);
+
+	return;
+}
+
+void
 liberarTablero()
 {
 	

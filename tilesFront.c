@@ -436,6 +436,41 @@ martillazoWrapper(tJuego * juego)
 }
 
 void
+guardarWrapper(tJuego * juego)
+{
+	char * nombreArchivo = calloc(MAX_NOMBRE, sizeof(char)), c;
+	int i, estado, argumentos;
+	
+	/* Validacion del nombre del archivo */
+	while ((c = getchar()) != '\n')
+	{
+		if (i > MAX_NOMBRE)
+		{
+			printf("La longitud maxima del nombre es %d...\n", MAX_NOMBRE);
+			free(nombreArchivo);
+			
+			return;
+		}
+		
+		nombreArchivo[i] = c;
+		
+		i++;
+	}
+
+	/* Guardar el juego */
+	estado = guardarJuego(nombreArchivo, juego);
+		
+	if (estado)
+		printf("%s guardado correctamente\n", nombreArchivo);
+	else
+		printf("Hubo un problema al guardar el juego\n");
+		
+	free(nombreArchivo);
+	
+	return;
+}
+
+void
 limpiarConsola()
 {
 	int i;

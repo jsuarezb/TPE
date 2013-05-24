@@ -361,3 +361,47 @@ puntos(int azulejosEliminados, tJuego * juego)
 	return juego->puntos;
 }
 
+int
+guardarJuego(char * nombreArchivo,tJuego * juego)
+{
+	FILE * archivo;
+	char c;
+	int e, i, j;
+	
+	archivo = fopen(nombreArchivo, "wb");
+	
+	if (archivo == NULL)
+		return 0;
+		
+	printf("Guardando datos\n");
+	/* Escritura de datos basicos */
+	fwrite(&juego->alto, sizeof(int), 1, archivo); /* Filas */
+	fwrite(&juego->ancho, sizeof(int), 1, archivo); /* Columnas */
+	fwrite(&juego->nivelMaximo, sizeof(int), 1, archivo);
+	fwrite(&juego->conBitacora, sizeof(char), 1, archivo);
+	fwrite(&juego->nivelActual, sizeof(int), 1, archivo);
+	fwrite(&juego->puntos, sizeof(int), 1, archivo);
+	fwrite(&juego->movHileras, sizeof(int), 1, archivo);
+	fwrite(&juego->movColumnas, sizeof(int), 1, archivo);
+	e = fwrite(&juego->movMartillazos, sizeof(int), 1, archivo);
+	
+	if (e == 0)
+		return 0;
+	
+	/* Escritura de tablero */
+	for (i = 0; i < juego->alto; i++)
+	{
+		for (j = 0; j < juego->ancho; j++)
+		{
+			c = juego->tablero[i][j];
+			e = fputc((c != 0) ? (c + 'A' - 1) : 0, archivo);
+			
+			if (e == EOF)
+				return 0;
+		}
+	}
+			
+	fclose(archivo);
+	
+	return 1;
+}

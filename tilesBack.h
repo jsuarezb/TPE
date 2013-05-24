@@ -103,4 +103,6 @@ int hayPoderes(tJuego * juego);
 
 int puntos(int azulejosEliminados, tJuego * juego);
 
+int guardarJuego(char * nombreArchivo, tJuego * juego);
+
 #endif

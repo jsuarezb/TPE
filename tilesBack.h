@@ -13,7 +13,7 @@ enum {PROXIMO_NIVEL, SEGUIR_JUGANDO, GAME_OVER, VICTORIA};
 
 typedef struct
 {
-  int ancho;
+	int ancho;
 	int alto;
 	int nivelMaximo;
 	int nivelActual;
@@ -21,6 +21,7 @@ typedef struct
 	int movHileras;
 	int movColumnas;
 	int movMartillazos;
+	int cantJugadas;
 	char conBitacora;
 	char ** tablero;
 } tJuego;
@@ -99,10 +100,14 @@ int validarPunto(int x, int y, tJuego * juego);
 
 int verificaMatriz(tJuego * juego);
 
-int calcularPuntos(int azulejosEliminados);
+int calcularPuntos(int azulejosEliminados, tJuego * juego);
 
 int guardarJuego(char * nombreArchivo, tJuego * juego);
 
 void initJuego(tJuego * juego);
+
+void bonus(tJuego * juego);
+
+void undo(tJuego * juego);
 
 #endif

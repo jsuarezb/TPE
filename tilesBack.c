@@ -95,7 +95,7 @@ eliminarHilera(int hilera, tJuego * juego)
 	/* Verifica que al menos un azulejo no este vacio en la hilera */
 	for (i = 0; i < juego->ancho && hayAzulejoVacio; i++)
 	{
-		if (juego->tablero[hilera][i] == 1)
+		if (juego->tablero[hilera][i] != 0)
 			hayAzulejoVacio = 0;
 			
 	}
@@ -128,8 +128,7 @@ eliminarColumna(int columna, tJuego * juego)
 	/* Verifica que el azulejo inferior no esté vacío.
 	 * Tener en cuenta que ya se aplicó la gravedad al tablero
 	 * pasado el movimiento anterior. */
-	printf("Valor de (%d, %d) = %d\n", columna, juego->alto - 1, juego->tablero[juego->alto - 1][columna]);
-	
+		
 	if (juego->tablero[juego->alto - 1][columna] == 0)
 			return 0;
 		
@@ -340,22 +339,23 @@ hayPoderes(tJuego * juego)
 }
 
 int
-calcularPuntos(int azulejosEliminados)
+calcularPuntos(int azulejosEliminados, tJuego * juego)
 {
 	int pts;
-	/*
-	** TODO: atencion a nuevo aviso para calcular puntos
-	*/
+	int totalAzulejos;
 	
-	/* TODO: es posible calcular para n <= 5 el puntaje real con:
-	 * resp = 2 ^ (n - 2) pero es necesario incluir math.h
-	 * ver si es posible de acuerdo a la catedra incluir la biblioteca
-	 * o hacer una funcion potencia(base, exp);
-	 */
-	if(azulejosEliminados <= 5)
-		pts = azulejosEliminados;
-	else
+	totalAzulejos = juego->ancho * juego->alto;
+	
+	if(azulejosEliminados == 1)
+		pts = 1;
+	else if(azulejosEliminados < totalAzulejos * 0.3)
 		pts = 2 * azulejosEliminados;
+		
+		else if(azulejosEliminados < totalAzulejos * 0.6)
+			pts = 3 * azulejosEliminados;
+			
+			else
+				pts = 4 * azulejosEliminados;
 		
 	return pts;
 }
@@ -392,7 +392,7 @@ guardarJuego(char * nombreArchivo,tJuego * juego)
 		for (j = 0; j < juego->ancho; j++)
 		{
 			c = juego->tablero[i][j];
-			e = fputc((c != 0) ? (c + 'A' - 1) : 0, archivo);
+			e = fputc((c != 0) ? (c + 'A' - 1) : '0', archivo);
 			
 			if (e == EOF)
 				return 0;
@@ -405,14 +405,53 @@ guardarJuego(char * nombreArchivo,tJuego * juego)
 }
 
 void
+bonus(tJuego * juego)
+{	
+	int totalAzulejos = juego->ancho * juego->alto;
+	
+	juego->movHileras++;
+	juego->movColumnas++;
+	juego->movMartillazos++;
+
+	if (juego->puntos >= 3*totalAzulejos)
+	{
+		juego->movHileras++;
+		juego->movColumnas++;	
+		juego->movMartillazos++;		
+	}
+	else if (juego->puntos >= 2*totalAzulejos)
+	{
+		juego->movHileras++;
+		juego->movColumnas++;
+	}
+	else if (juego->puntos >= totalAzulejos)
+		juego->movHileras++;
+
+	return;
+}		
+	
+
+void
 initJuego(tJuego * juego)
 {
 	/* Crear un tJuego para el juego nuevo seteando todas sus 
 	 * variables a los valores iniciales */
 	juego->puntos = 0;
 	/* Siendo 1 el primer nivel (aumenta al crear tablero nuevo) */
-	juego->nivelActual = 0; 
+	juego->nivelActual = 1; 
 	juego->movHileras = 1;
 	juego->movColumnas = 1;
 	juego->movMartillazos = 1;
+}
+
+void
+liberarTabler()
+{
+	
+}
+
+void
+undo(tJuego * juego)
+{
+
 }

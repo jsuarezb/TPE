@@ -4,6 +4,7 @@
 #include "tilesBack.h"
 #include "getnum.h"
 #define MIN_DIM 3
+#define MAX_NOMBRE 50
 #define VALIDAR_AUX(x) ((x) != ' ' && (x) != '\n')
 
 /* Enums */
@@ -289,7 +290,7 @@ hacerJugada(tJuego * juego)
 		if (juego->conBitacora)
 		{
 			char accion[4] = {"emch"};
-			printf("%c %d, %d;%d \n", accion[jugadaaValidada-1], jugada.punto.x, jugada.punto.y, jugada.azulejosEliminados);
+			printf("%c %d, %d;%d \n", accion[jugadaValidada-1], jugada.punto.x, jugada.punto.y, jugada.azulejosEliminados);
 		}
 	} while (jugadaValidada == ERROR);
 	

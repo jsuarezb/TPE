@@ -23,6 +23,11 @@ int comenzarJuego(); // Comienza el juego
 int juegoNuevo();
 int juegoBitacora();
 int recuperar();
+tJugada eliminarWrapper(tJuego * juego);
+tJugada columnaWrapper(tJuego * juego);
+tJugada hileraWrapper(tJuego * juego);
+tJugada martillazoWrapper(tJuego * juego);
+
 
 int
 main()
@@ -84,7 +89,10 @@ analizarOpcion(int opcion, tJuego * juego)
 			juegoNuevo(juego);
 			break;
 		case JUEGO_BITACORA:
-			juegoBitacora();
+			juego->conBitacora=1;
+			pedirDimensiones(juego);
+			pedirNiveles(juego);
+			juegoNuevo(juego);/**/
 			break;
 		case RECUPERAR:
 			recuperar();
@@ -156,7 +164,8 @@ juegoNuevo(tJuego * juego)
 		}
 		
 		imprimirTablero(juego);
-		hacerJugada(juego);
+		puntos(hacerJugada(juego),juego);
+		//hacerJugada(juego);
 		reacomodarTablero(juego);
 		estadoTablero = verificaMatriz(juego);
 	}
@@ -167,6 +176,7 @@ juegoNuevo(tJuego * juego)
 int
 juegoBitacora()
 {
+	
 	return 0;
 }
 
@@ -181,9 +191,6 @@ imprimirTablero(tJuego * juego)
 {
 	int i, j;
 	
-	printf("Hileras: %d, ", juego->movHileras);
-	printf("Columnas: %d, ", juego->movColumnas);
-	printf("Martillazos: %d\n", juego->movMartillazos);
 	printf("Tablero: \n");
 	
 	/* Imprime la hilera de las posiciones de las columnas */
@@ -259,34 +266,46 @@ pedirJugada()
 	}
 
 }
+
+/*char
+acciones(int jugadaValidada)
+{
+	char accion[4] = {"emch"};
+	return accion[jugadaValidada-1];
+}*/
 			
 int
 hacerJugada(tJuego * juego)
 {
-	int estado, jugada, argumentos, azulejosEliminados = 0;
-	tPunto punto;
+	int estado, jugadaValidada, argumentos, azulejosEliminados = 0;
+	tJugada jugada;
 	
 	enum {ERROR, ELIMINAR, MARTILLAZO, COLUMNA, HILERA, UNDO, SAVE, QUIT};
 
 	do
 	{
 		printf("Ingresar accion:\n");
-		jugada = pedirJugada();
-	} while (jugada == ERROR);
+		jugadaValidada = pedirJugada();
+		if (juego->conBitacora)
+		{
+			char accion[4] = {"emch"};
+			printf("%c %d, %d;%d \n", accion[jugadaaValidada-1], jugada.punto.x, jugada.punto.y, jugada.azulejosEliminados);
+		}
+	} while (jugadaValidada == ERROR);
 	
-		switch(jugada)
+		switch(jugadaValidada)
 		{
 			case ELIMINAR:
-				azulejosEliminados = eliminarWrapper(juego);
+				jugada = eliminarWrapper(juego);
 				break;
 			case MARTILLAZO:
-				azulejosEliminados = martillazoWrapper(juego);
+				jugada = martillazoWrapper(juego);
 				break;
 			case COLUMNA:
-				azulejosEliminados = columnaWrapper(juego);
+				jugada = columnaWrapper(juego);
 				break;
 			case HILERA:
-				azulejosEliminados = hileraWrapper(juego);
+				jugada = hileraWrapper(juego);
 				break;
 			case UNDO:
 			
@@ -302,16 +321,17 @@ hacerJugada(tJuego * juego)
 				break;
 		}
 	
-	printf("Azulejos eliminados: %d\n", azulejosEliminados);
+	printf("Azulejos eliminados: %d\n", jugada.azulejosEliminados);
 	
-	return azulejosEliminados;
+	return jugada.azulejosEliminados;
 }
 
-int
+tJugada
 eliminarWrapper(tJuego * juego)
 {
 	int x, y, argumentos = 0, estado, azulejosEliminados;
-	tPunto punto;
+	
+	tJugada jugada;
 	
 	argumentos = scanf("%d, %d", &y, &x);
 	
@@ -322,9 +342,9 @@ eliminarWrapper(tJuego * juego)
 		switch (estado)
 		{
 			case PUNTO_VALIDO:
-				punto.x = x;
-				punto.y = y;
-				azulejosEliminados = eliminar(juego->tablero[y][x], punto, juego);
+				jugada.punto.x = x;
+				jugada.punto.y = y;
+				jugada.azulejosEliminados = eliminar(juego->tablero[y][x], jugada.punto, juego);
 				break;
 			case PUNTO_VACIO:
 				printf("El punto (%d, %d) esta vacio\n", x, y);
@@ -335,53 +355,59 @@ eliminarWrapper(tJuego * juego)
 		}
 	}
 	
-	return azulejosEliminados;
+	return jugada;
 }
 
-int
+tJugada
 hileraWrapper(tJuego * juego)
 {
-	int y, argumentos, azulejosEliminados = 0, estado;
+	tJugada jugada;
+	int y, argumentos, estado;
 	
 	argumentos = scanf("%d", &y);
 	
 	if (argumentos == 1)
 	{
-		azulejosEliminados = eliminarHilera(y, juego);
+		jugada.punto.x = -1; //Indicando que no hay coordenada X 
+		jugada.punto.y = y;
+		jugada.azulejosEliminados = eliminarHilera(y, juego);
 		
-		if (azulejosEliminados == 0)
+		if (jugada.azulejosEliminados == 0)
 			printf("Imposible eliminar la fila %d\n", y);
 	
 	}
 	
-	return azulejosEliminados;
+	return jugada;
 }
 
-int
+tJugada
 columnaWrapper(tJuego * juego)
 {
-	int x, argumentos, azulejosEliminados = 0;
+	tJugada jugada;
+	int x, argumentos;
 	
 	argumentos = scanf("%d", &x);
 	
 	if (argumentos == 1)
 	{
 		printf("Antes de columna\n");
-		azulejosEliminados = eliminarColumna(x, juego);
+		jugada.punto.x = x;
+		jugada.punto.y = -1; //Indicando que no hay coordenada y
+		jugada.azulejosEliminados = eliminarColumna(x, juego);
 		
-		if (azulejosEliminados == 0)
+		if (jugada.azulejosEliminados == 0)
 			printf("Imposible eliminar la columna %d\n", x);
 	
 	}
 	
-	return azulejosEliminados;
+	return jugada;
 }
 
-int
+tJugada
 martillazoWrapper(tJuego * juego)
 {
 	int x, y, argumentos = 0, estado, azulejosEliminados;
-	tPunto punto;
+	tJugada jugada;
 	
 	argumentos = scanf("%d, %d", &x, &y);
 	
@@ -393,9 +419,9 @@ martillazoWrapper(tJuego * juego)
 		switch (estado)
 		{
 			case PUNTO_VALIDO:
-				punto.x = x;
-				punto.y = y;
-				azulejosEliminados = eliminarMartillazo(punto, juego);
+				jugada.punto.x = x;
+				jugada.punto.y = y;
+				jugada.azulejosEliminados = eliminarMartillazo(jugada.punto, juego);
 				break;
 			case PUNTO_VACIO:
 				printf("El punto (%d, %d) esta vacio\n", x, y);
@@ -406,7 +432,7 @@ martillazoWrapper(tJuego * juego)
 		}
 	}
 	
-	return azulejosEliminados;
+	return jugada;
 }
 
 void

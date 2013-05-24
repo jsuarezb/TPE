@@ -108,6 +108,8 @@ void initJuego(tJuego * juego);
 
 void bonus(tJuego * juego);
 
+void leerArchivo(FILE * partidaGuardada, tJuego * juego);
+
 void undo(tJuego * juego);
 
 #endif

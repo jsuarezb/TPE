@@ -187,6 +187,7 @@ comenzarJuego(tJuego * juego)
 		printf("m: %d\n", juego->movMartillazos);
 	}
 	
+	printf("Lo siento, no quedan mas movimientos.\nHa perdido.");
 	return;
 }
 

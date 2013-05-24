@@ -316,7 +316,7 @@ verificaMatriz(tJuego * juego)
 			punto.y = j;
 			
 			/* Es posible seguir jugando */
-			if (hayColorAdyacente(punto, juego ))
+			if (hayColorAdyacente(punto, juego))
 				return SEGUIR_JUGANDO;
 
 		}

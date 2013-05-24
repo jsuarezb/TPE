@@ -9,6 +9,7 @@ enum {E, H, C, M, UNDO, SAVE, QUIT};
 /* Funciones */
 
 static void correrColumna(int posAnterior, int posNueva, tJuego * juego);
+static int hayPoderes(tJuego * juego);
 
 char **
 crearTablero(tJuego * juego)
@@ -49,11 +50,11 @@ eliminar(int color, tPunto punto, tJuego * juego)
 	if (validarPunto(punto.x, punto.y, juego) != PUNTO_VALIDO)
 		return 0;
 	
-	/* Eliminacion */
 	if (juego->tablero[punto.y][punto.x] != color)
 		return 0;
 	else
 	{
+		/* Eliminacion */
 		juego->tablero[punto.y][punto.x] = 0;
 		crearAdyacentes(punto, puntosAdyacentes);
 	
@@ -113,9 +114,7 @@ eliminarHilera(int hilera, tJuego * juego)
 		}
 	}
 
-	/*
-	** TODO: Disminuir movimientos eliminarHilera
-	*/
+	juego->movHileras--;
 	
 	return azulejos;
 }
@@ -144,9 +143,7 @@ eliminarColumna(int columna, tJuego * juego)
 		azulejos++;
 	}
 
-	/*
-	** TODO: Disminuir movimientos eliminarHilera
-	*/
+	juego->movColumnas--;
 	
 	return azulejos;
 }
@@ -175,9 +172,7 @@ eliminarMartillazo(tPunto punto, tJuego * juego)
 		}
 	}
 	
-	/*
-	** TODO: Disminuir en uno los movimientos martillazo
-	*/
+	juego->movMartillazos--;
 	
 	return azulejosEliminados;
 }
@@ -322,20 +317,18 @@ verificaMatriz(tJuego * juego)
 			
 			/* Es posible seguir jugando */
 			if (hayColorAdyacente(punto, juego ))
-			{
-				printf("Se Puede Seguir Jugando \n");
 				return SEGUIR_JUGANDO;
-			}
-			//validar columnas martillos e hileras
+
 		}
 	}
+	
 	if (hayPoderes(juego))
 		return SEGUIR_JUGANDO;
 	else 
 		return GAME_OVER;
 }
 
-int 
+static int 
 hayPoderes(tJuego * juego)
 {
 	int estado = 0;
@@ -347,8 +340,9 @@ hayPoderes(tJuego * juego)
 }
 
 int
-calcularPuntos(int azulejosEliminados, tJuego * juego)
+calcularPuntos(int azulejosEliminados)
 {
+	int pts;
 	/*
 	** TODO: atencion a nuevo aviso para calcular puntos
 	*/
@@ -359,13 +353,11 @@ calcularPuntos(int azulejosEliminados, tJuego * juego)
 	 * o hacer una funcion potencia(base, exp);
 	 */
 	if(azulejosEliminados <= 5)
-		juego->puntos += azulejosEliminados;
+		pts = azulejosEliminados;
 	else
-		juego->puntos += 2 * azulejosEliminados;
+		pts = 2 * azulejosEliminados;
 		
-	printf("Puntaje: %d \n", juego->puntos);
-
-	return juego->puntos;
+	return pts;
 }
 
 int
@@ -379,8 +371,7 @@ guardarJuego(char * nombreArchivo,tJuego * juego)
 	
 	if (archivo == NULL)
 		return 0;
-		
-	printf("Guardando datos\n");
+
 	/* Escritura de datos basicos */
 	fwrite(&juego->alto, sizeof(int), 1, archivo); /* Filas */
 	fwrite(&juego->ancho, sizeof(int), 1, archivo); /* Columnas */
@@ -411,4 +402,17 @@ guardarJuego(char * nombreArchivo,tJuego * juego)
 	fclose(archivo);
 	
 	return 1;
+}
+
+void
+initJuego(tJuego * juego)
+{
+	/* Crear un tJuego para el juego nuevo seteando todas sus 
+	 * variables a los valores iniciales */
+	juego->puntos = 0;
+	/* Siendo 1 el primer nivel (aumenta al crear tablero nuevo) */
+	juego->nivelActual = 0; 
+	juego->movHileras = 1;
+	juego->movColumnas = 1;
+	juego->movMartillazos = 1;
 }

@@ -99,10 +99,10 @@ int validarPunto(int x, int y, tJuego * juego);
 
 int verificaMatriz(tJuego * juego);
 
-int hayPoderes(tJuego * juego);
-
-int calcularPuntos(int azulejosEliminados, tJuego * juego);
+int calcularPuntos(int azulejosEliminados);
 
 int guardarJuego(char * nombreArchivo, tJuego * juego);
+
+void initJuego(tJuego * juego);
 
 #endif

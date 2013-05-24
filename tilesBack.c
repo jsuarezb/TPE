@@ -111,7 +111,9 @@ eliminarHilera(int hilera, tJuego * juego)
 		}
 	}
 
-	juego->movHileras--;
+	/*
+	** TODO: Disminuir movimientos eliminarHilera
+	*/
 	
 	return azulejos;
 }
@@ -140,7 +142,9 @@ eliminarColumna(int columna, tJuego * juego)
 		azulejos++;
 	}
 
-	juego->movColumnas--;
+	/*
+	** TODO: Disminuir movimientos eliminarHilera
+	*/
 	
 	return azulejos;
 }
@@ -169,7 +173,9 @@ eliminarMartillazo(tPunto punto, tJuego * juego)
 		}
 	}
 	
-	juego->movMartillazos--;
+	/*
+	** TODO: Disminuir en uno los movimientos martillazo
+	*/
 	
 	return azulejosEliminados;
 }
@@ -177,7 +183,7 @@ eliminarMartillazo(tPunto punto, tJuego * juego)
 /*
 **
 */
-static int
+int
 hayColorAdyacente(tPunto punto, tJuego * juego)
 {
 	int color, i, hayAdyacente = 0, x, y;
@@ -315,7 +321,7 @@ verificaMatriz(tJuego * juego)
 			/* Es posible seguir jugando */
 			if (hayColorAdyacente(punto, juego ))
 			{
-				printf("Se Puede Seguir Jugando");
+				printf("Se Puede Seguir Jugando \n");
 				return SEGUIR_JUGANDO;
 			}
 			//validar columnas martillos e hileras
@@ -349,6 +355,8 @@ puntos(int azulejosEliminados, tJuego * juego)
 		juego->puntos += azulejosEliminados;
 	else
 		juego->puntos += 2 * azulejosEliminados;
+		
+	printf("Puntaje: %d \n", juego->puntos);
 
 	return juego->puntos;
 }

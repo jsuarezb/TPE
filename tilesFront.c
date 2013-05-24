@@ -24,7 +24,7 @@ void imprimirTablero(tJuego * juego);
 void analizarOpcion(int opcion, tJuego * juego); // Actua de acuerdo a la opcion pasada
 int menuNuevo(); // Crea menu nuevo y devuelve opcion elegida
 void comenzarJuego(); // Comienza el juego
-int recuperar();
+void recuperar(tJuego * juego);
 int hacerJugada(tJuego * juego);
 tJugada eliminarWrapper(tJuego * juego);
 tJugada columnaWrapper(tJuego * juego);
@@ -92,6 +92,7 @@ analizarOpcion(int opcion, tJuego * juego)
 			
 			pedirDimensiones(juego);
 			pedirNiveles(juego);
+			juego->tablero = crearTablero(juego);
 			comenzarJuego(juego);
 			break;
 		case JUEGO_BITACORA:
@@ -100,12 +101,13 @@ analizarOpcion(int opcion, tJuego * juego)
 			
 			pedirDimensiones(juego);
 			pedirNiveles(juego);
+			juego->tablero = crearTablero(juego);
 			comenzarJuego(juego);
 			break;
 		case RECUPERAR:
 			recuperar(juego);
+			comenzarJuego(juego);
 
-			comenzarJuego();
 			break;
 		case TERMINAR:
 			printf("Gracias por jugar! Adios!\n");
@@ -162,8 +164,6 @@ void
 comenzarJuego(tJuego * juego)
 {
 	int estadoTablero = SEGUIR_JUGANDO, pts = 0, resp = 0;
-	
-	juego->tablero = crearTablero(juego);
 
 	while (estadoTablero != GAME_OVER)
 	{		
@@ -219,11 +219,22 @@ comenzarJuego(tJuego * juego)
 	return;
 }
 
-int
-recuperar()
-{
+void
+recuperar(tJuego * juego)
+{	
+	char nombreArchivo[MAX_NOMBRE];
+
+	printf("Ingrese el nombre del archivo: ");
 	
-	return 0;
+	fgets(nombreArchivo, MAX_NOMBRE, stdin);
+
+	FILE * partidaGuardada;
+
+	partidaGuardada = fopen("prueba1", "rb");	
+	
+	leerArchivo(partidaGuardada, juego);
+	
+	return;
 }
 
 void
@@ -329,8 +340,8 @@ hacerJugada(tJuego * juego)
 	} while (jugadaValidada == ERROR);
 	
 	auxJuego = *juego;
-	copiarTablero(tJuego * origen, tJuego * destino);
 
+	
 	switch(jugadaValidada)
 	{
 		case ELIMINAR:
@@ -346,7 +357,7 @@ hacerJugada(tJuego * juego)
 			jugada = hileraWrapper(juego);
 			break;
 		case UNDO:
-			undo();
+			
 			break;
 		case SAVE:
 			guardarWrapper(juego);

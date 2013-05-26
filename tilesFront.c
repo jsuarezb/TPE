@@ -108,8 +108,6 @@ analizarOpcion(int opcion, tJuego * juego)
 		case RECUPERAR:
 			recuperar(juego);
 			comenzarJuego(juego);
-			
-
 			break;
 		case TERMINAR:
 			printf("Gracias por jugar! Adios!\n");
@@ -169,7 +167,8 @@ comenzarJuego(tJuego * juego)
 
 	while (estadoTablero != GAME_OVER)
 	{		
-
+				
+		
 		printf("\nNivel %d\n", juego->nivelActual);
 			
 		pts = calcularPuntos(resp, juego);
@@ -181,11 +180,10 @@ comenzarJuego(tJuego * juego)
 		printf("c: %d, ", juego->movColumnas);
 		printf("m: %d\n", juego->movMartillazos);
 
-		reacomodarTablero(juego);
-
-		imprimirTablero(juego);
+		
 
 		estadoTablero = verificaMatriz(juego);
+
 		
 		/* Pasar al proximo nivel */
 		if (estadoTablero == PROXIMO_NIVEL)
@@ -211,17 +209,28 @@ comenzarJuego(tJuego * juego)
 		}
 		else if (estadoTablero != GAME_OVER)
 		{
+			imprimirTablero(juego);
+
+			/* Crea una copia auxiliar del juego */
+			juegoUndo(juego);
+			
 			resp = hacerJugada(juego);
+			
+			reacomodarTablero(juego);
+			
+			
+			
 			if (resp == -1) /* FIN DEL JUEGO (perdido) */
 				return;
 		}	
+
 	}
 	
 	printf("Lo siento, no quedan mas movimientos.\nHa perdido.");
 	return;
 }
 
-/* TODO: validar el fopen y arreglar warnings */
+/* TODO: validar el fopen */
  
 void
 recuperar(tJuego * juego)
@@ -282,6 +291,36 @@ imprimirTablero(tJuego * juego)
 			
 		printf("\033[0m\n");
 	}
+	/***********************************/
+	
+	printf("/**************JuegoUndo: *************/\n");
+	
+	printf("  ");
+	
+	for (i = 0; i < juego->ancho; i++)
+	{
+		if (i % 2 == 0)
+			(i < 10) ? printf(" %d", i) : printf("%d", i);
+		else
+			printf("  ");
+	}
+	
+	putchar('\n');
+	
+	for (i = 0; i < juego->alto; i++)
+	{
+		(i < 10) ? printf("\033[0m %d", i) : printf("\033[0m%d", i);
+		
+		for (j = 0; j < juego->ancho; j++)
+			printf("\033[%dm %c", juego->juegoUndo.tableroUndo[i][j] + 30,
+		(juego->juegoUndo.tableroUndo[i][j] > 0) ? 178 : ' ');
+			
+		printf("\033[0m\n");
+	}
+	printf("%d puntos \n", juego->juegoUndo.puntos);
+	printf("%d hileras \n", juego->juegoUndo.movHileras);
+	printf("%d mar \n", juego->juegoUndo.movMartillazos);
+	printf("%d col \n", juego->juegoUndo.movColumnas);
 }
 
 int
@@ -370,7 +409,8 @@ hacerJugada(tJuego * juego)
 			jugada = hileraWrapper(juego);
 			break;
 		case UNDO:
-			
+			undo(juego);
+
 			break;
 		case SAVE:
 			guardarWrapper(juego);

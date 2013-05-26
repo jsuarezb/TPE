@@ -3,6 +3,7 @@
 #include <time.h>
 #include "tilesBack.h"
 #include "getnum.h"
+#include <string.h>
 #define MIN_DIM 3
 #define MAX_DIM 40
 #define MAX_NOMBRE 50
@@ -107,6 +108,7 @@ analizarOpcion(int opcion, tJuego * juego)
 		case RECUPERAR:
 			recuperar(juego);
 			comenzarJuego(juego);
+			
 
 			break;
 		case TERMINAR:
@@ -219,18 +221,29 @@ comenzarJuego(tJuego * juego)
 	return;
 }
 
+/* TODO: validar el fopen y arreglar warnings */
+ 
 void
 recuperar(tJuego * juego)
 {	
+	FILE * partidaGuardada;
+	char * nombreArchivoAux;
 	char nombreArchivo[MAX_NOMBRE];
+	int lenArchivo;
+	
+	nombreArchivoAux = malloc(MAX_NOMBRE*sizeof(char));
 
 	printf("Ingrese el nombre del archivo: ");
 	
-	fgets(nombreArchivo, MAX_NOMBRE, stdin);
+	fgets(nombreArchivoAux, MAX_NOMBRE, stdin);
+	
+	lenArchivo = (strlen(nombreArchivoAux))-1;
+	
+	/*Quita el "\n" de nombreArchivoAux para su uso en fopen*/
 
-	FILE * partidaGuardada;
+	strncpy(nombreArchivo, nombreArchivoAux, lenArchivo);
 
-	partidaGuardada = fopen("prueba1", "rb");	
+	partidaGuardada = fopen(nombreArchivo, "rb");	
 	
 	leerArchivo(partidaGuardada, juego);
 	

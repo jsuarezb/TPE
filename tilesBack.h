@@ -13,6 +13,15 @@ enum {PROXIMO_NIVEL, SEGUIR_JUGANDO, GAME_OVER, VICTORIA};
 
 typedef struct
 {
+	int puntos;
+	int movHileras;
+	int movColumnas;
+	int movMartillazos;
+	char ** tableroUndo;
+} tJuegoUndo;
+
+typedef struct
+{
 	int ancho;
 	int alto;
 	int nivelMaximo;
@@ -24,6 +33,7 @@ typedef struct
 	int cantJugadas;
 	char conBitacora;
 	char ** tablero;
+	tJuegoUndo juegoUndo;
 } tJuego;
 
 typedef struct
@@ -111,5 +121,7 @@ void bonus(tJuego * juego);
 void leerArchivo(FILE * partidaGuardada, tJuego * juego);
 
 void undo(tJuego * juego);
+
+void juegoUndoUndo(tJuego * juego);
 
 #endif

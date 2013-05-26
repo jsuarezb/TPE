@@ -18,16 +18,20 @@ crearTablero(tJuego * juego)
 
 	/* Creacion de filas */
 	juego->tablero = malloc(juego->alto * sizeof(char *));
+	juego->juegoUndo.tableroUndo = malloc(juego->alto * sizeof(char *));
 	
 	for (i = 0; i < juego->alto; i++)
 	{
 		/* Creacion de columnas */
 		juego->tablero[i] = malloc(juego->ancho * sizeof(char));
+		juego->juegoUndo.tableroUndo[i] = malloc(juego->ancho * sizeof(char *));
 		
 		for (j = 0; j < juego->ancho; j++)
 			juego->tablero[i][j] = rand() % (juego->nivelActual + 1) + 1;
+			juego->juegoUndo.tableroUndo[i][j] = juego->tablero[i][j];
 
 	}
+	
 	
 	return juego->tablero;
 	
@@ -485,7 +489,53 @@ liberarTablero()
 }
 
 void
+juegoUndo(tJuego * juego)
+{
+	int i, j;	
+	
+	/* Copia el tablero */
+	for (i = 0; i < juego->alto; i++)
+	{
+		
+		for (j = 0; j < juego->ancho; j++)
+			juego->juegoUndo.tableroUndo[i][j] = juego->tablero[i][j];
+
+	}
+	
+	juego->juegoUndo.movHileras = juego->movHileras;
+	juego->juegoUndo.movColumnas = juego->movColumnas;
+	juego->juegoUndo.movMartillazos = juego->movMartillazos;
+	juego->juegoUndo.puntos = juego->puntos;
+	
+	return;
+}
+
+void 
 undo(tJuego * juego)
 {
+	int i, j;	
+	
+	for (i = 0; i < juego->alto; i++)
+	{
+		
+		for (j = 0; j < juego->ancho; j++)
+			juego->tablero[i][j] = juego->juegoUndo.tableroUndo[i][j];
 
+	}
+	
+	juego->movHileras = juego->juegoUndo.movHileras;
+	juego->movColumnas = juego->juegoUndo.movColumnas;
+	juego->movMartillazos = juego->juegoUndo.movMartillazos;
+	juego->puntos = juego->juegoUndo.puntos;
+	
+	
+	return;
 }
+
+
+
+
+
+
+
+

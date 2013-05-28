@@ -99,7 +99,7 @@ analizarOpcion(int opcion, tJuego * juego)
 		case JUEGO_BITACORA:
 			juego->conBitacora = 1;
 			juego->cantJugadas = 0;
-			
+
 			pedirDimensiones(juego);
 			pedirNiveles(juego);
 			juego->tablero = crearTablero(juego);
@@ -394,24 +394,36 @@ hacerJugada(tJuego * juego)
 	
 	if (juego->conBitacora)
 	{
-		printf("%c ", accion[jugadaValidada - 1]);
+		
+		FILE * bitacora;
+		
+		bitacora = fopen("Bitacora.txt", "wt");
+		
+		if (bitacora == NULL)
+			return 0;
+		
+		
+		fprintf(bitacora, "%c ", accion[jugadaValidada - 1]);
 		
 		/* Si es necesario imprimir dos coordenadas */
 		if (jugada.punto.x != -1 && jugada.punto.y != -1)
-			printf("%d, %d", jugada.punto.y, jugada.punto.x);
+			fprintf(bitacora, "%d, %d", jugada.punto.y, jugada.punto.x);
 		else
-			printf("%d", jugada.punto.x < 0 ? jugada.punto.x : jugada.punto.y);
+			fprintf(bitacora, "%d", jugada.punto.x < 0 ? jugada.punto.x : jugada.punto.y);
 
 		if(jugada.azulejosEliminados > 0)
-			printf("; %d \n", jugada.azulejosEliminados);
-		else
-			printf("; JUGADA ERRONEA \n");
+			fprintf(bitacora,"; %d \n", jugada.azulejosEliminados);
+		//else
+			//fprintf(bitacora, "; JUGADA ERRONEA \n");
+		//fclose(bitacora);
 	}
 	
 	getchar(); /* Come el \n al final del buffer */
 
 	return jugada.azulejosEliminados;
 }
+
+
 
 tJugada
 eliminarWrapper(tJuego * juego)

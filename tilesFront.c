@@ -97,12 +97,24 @@ analizarOpcion(int opcion, tJuego * juego)
 			comenzarJuego(juego);
 			break;
 		case JUEGO_BITACORA:
+			
 			juego->conBitacora = 1;
 			juego->cantJugadas = 0;
-
+			juego->bitacora = fopen("Bitacora.txt", "wt");
+			int i, j;
+			
 			pedirDimensiones(juego);
 			pedirNiveles(juego);
 			juego->tablero = crearTablero(juego);
+			
+			/* Copia el primer tablero a la bitacora */
+			for (i = 0; i < juego->alto; i++)
+			{
+				for (j = 0; j < juego->ancho; j++)
+					fprintf(juego->bitacora, "%d", juego->tablero[i][j]);		
+				fprintf(juego->bitacora, "\n", NULL);
+			}
+			
 			comenzarJuego(juego);
 			break;
 		case RECUPERAR:
@@ -194,17 +206,35 @@ comenzarJuego(tJuego * juego)
 			juego->puntos = 0;
 			pts = 0;
 			resp = 0;
+			
+			juego->cantJugadas = 0;
+			
 			/* FIN DEL JUEGO (ganado) */
 			if (juego->nivelActual > juego->nivelMaximo)
 			{
 				printf("Felicitaciones, ha ganado!\n");
 				printf("Ha completado el nivel %d.\n", juego->nivelMaximo);
+				if (juego->conBitacora)
+					fclose(juego->bitacora);
 				
 				return;
 			}
 			
 
 			juego->tablero = crearTablero(juego);
+			
+			/* Copia el tablero del siguiente nivel a la bitacora */
+			if (juego->conBitacora)
+			{
+				int i, j;
+				for (i = 0; i < juego->alto; i++)
+				{
+					for (j = 0; j < juego->ancho; j++)
+						fprintf(juego->bitacora, "%d", juego->tablero[i][j]);
+						
+					fprintf(juego->bitacora, "\n", NULL);
+				}
+			}
 			
 		}
 		else if (estadoTablero != GAME_OVER)
@@ -218,16 +248,22 @@ comenzarJuego(tJuego * juego)
 			
 			
 			if (resp == -1) /* FIN DEL JUEGO (perdido) */
+			{
+				if (juego->conBitacora)
+					fclose(juego->bitacora);
 				return;
+			}
 		}	
 
 	}
 	
 	printf("Lo siento, no quedan mas movimientos.\nHa perdido.");
+	if (juego->conBitacora)
+		fclose(juego->bitacora);
 	return;
 }
 
-/* TODO: validar el fopen */
+/* TODO: validar el fopen y fijarse si no es mas efectivo hacerlo con getchar*/
  
 void
 recuperar(tJuego * juego)
@@ -349,7 +385,6 @@ hacerJugada(tJuego * juego)
 	char accion[4] = {"emch"};
 	int jugadaValidada;
 	tJugada jugada;
-	tJuego auxJuego;
 	
 	jugada.azulejosEliminados = 0;
 	
@@ -380,7 +415,6 @@ hacerJugada(tJuego * juego)
 			break;
 		case UNDO:
 			undo(juego);
-
 			break;
 		case SAVE:
 			guardarWrapper(juego);
@@ -393,29 +427,35 @@ hacerJugada(tJuego * juego)
 	}
 	
 	if (juego->conBitacora)
-	{
+	{	
+		fprintf(juego->bitacora, "%d: ", juego->cantJugadas);
 		
-		FILE * bitacora;
+		if (jugadaValidada == 5)
+			fprintf(juego->bitacora, "undo \n", NULL);
 		
-		bitacora = fopen("Bitacora.txt", "wt");
+		if (jugadaValidada == 6)
+			fprintf(juego->bitacora, "save \n", NULL);
 		
-		if (bitacora == NULL)
-			return 0;
+		if (jugadaValidada == 7)
+			fprintf(juego->bitacora, "quit \n", NULL);
 		
+		if (jugadaValidada >= 1 && jugadaValidada <= 4)
+		{
+			fprintf(juego->bitacora, "%c ", accion[jugadaValidada - 1]);
+			/* Si es necesario imprimir dos coordenadas */
+			if (jugada.punto.x != -1 && jugada.punto.y != -1)
+				fprintf(juego->bitacora, "%d, %d", jugada.punto.y, jugada.punto.x);
+			if (jugada.punto.x == -1)
+				fprintf(juego->bitacora, "%d", jugada.punto.y);
+			if (jugada.punto.y == -1)
+				fprintf(juego->bitacora, "%d", jugada.punto.x);
+				
+			if(jugada.azulejosEliminados > 0)
+				fprintf(juego->bitacora,"; %d \n", jugada.azulejosEliminados);
+		}
 		
-		fprintf(bitacora, "%c ", accion[jugadaValidada - 1]);
-		
-		/* Si es necesario imprimir dos coordenadas */
-		if (jugada.punto.x != -1 && jugada.punto.y != -1)
-			fprintf(bitacora, "%d, %d", jugada.punto.y, jugada.punto.x);
-		else
-			fprintf(bitacora, "%d", jugada.punto.x < 0 ? jugada.punto.x : jugada.punto.y);
-
-		if(jugada.azulejosEliminados > 0)
-			fprintf(bitacora,"; %d \n", jugada.azulejosEliminados);
-		//else
-			//fprintf(bitacora, "; JUGADA ERRONEA \n");
-		//fclose(bitacora);
+		juego->cantJugadas++;
+			
 	}
 	
 	getchar(); /* Come el \n al final del buffer */
@@ -568,14 +608,15 @@ void
 guardarWrapper(tJuego * juego)
 {
 	char * nombreArchivo = calloc(MAX_NOMBRE, sizeof(char)), c;
-	int i, estado;
+	int i = 0, estado;
+	int validarRename = 0;
 	
 	/* Validacion del nombre del archivo */
 	while ((c = getchar()) != '\n')
 	{
 		if (i > MAX_NOMBRE)
 		{
-			printf("La longitud maxima del nombre es %d...\n", MAX_NOMBRE);
+			printf("La longitud maxima del nombre es %d: \n", MAX_NOMBRE);
 			free(nombreArchivo);
 			
 			return;
@@ -585,16 +626,35 @@ guardarWrapper(tJuego * juego)
 		
 		i++;
 	}
-
+		
+	
+	if (juego->conBitacora)
+	{
+		
+		char nombreArchivoBit[i + 4];
+		
+		strcpy(nombreArchivoBit, nombreArchivo);
+		strcat(nombreArchivoBit, ".txt" );
+		
+		validarRename = rename("Bitacora.txt", nombreArchivoBit);
+		
+		strcpy(juego->nombreBitacora, nombreArchivoBit);
+		juego->lenNombreBit = strlen(nombreArchivoBit);
+	}
+	
 	/* Guardar el juego */
+	
 	estado = guardarJuego(nombreArchivo, juego);
 		
 	if (estado)
 		printf("\"%s\" guardado correctamente\n", nombreArchivo);
 	else
 		printf("Hubo un problema al guardar el juego\n");
+	if (validarRename != 0)
+		printf("La bitacora no pudo ser guardada. \n");
 		
-	putchar('\n'); /* Estilo */
+		
+	
 	free(nombreArchivo);
 	
 	return;

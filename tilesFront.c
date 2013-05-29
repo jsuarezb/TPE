@@ -285,7 +285,14 @@ recuperar(tJuego * juego)
 
 	strncpy(nombreArchivo, nombreArchivoAux, lenArchivo);
 
-	partidaGuardada = fopen(nombreArchivo, "rb");	
+	partidaGuardada = fopen(nombreArchivo, "rb");
+	
+	char nombreArchivoBit[lenArchivo + 4];
+		
+	strcpy(nombreArchivoBit, nombreArchivo);
+	strcat(nombreArchivoBit, ".txt" );
+		
+	juego->bitacora = fopen(nombreArchivoBit, "r+");	
 	
 	leerArchivo(partidaGuardada, juego);
 	
@@ -432,12 +439,6 @@ hacerJugada(tJuego * juego)
 		
 		if (jugadaValidada == 5)
 			fprintf(juego->bitacora, "undo \n", NULL);
-		
-		if (jugadaValidada == 6)
-			fprintf(juego->bitacora, "save \n", NULL);
-		
-		if (jugadaValidada == 7)
-			fprintf(juego->bitacora, "quit \n", NULL);
 		
 		if (jugadaValidada >= 1 && jugadaValidada <= 4)
 		{
@@ -637,9 +638,6 @@ guardarWrapper(tJuego * juego)
 		strcat(nombreArchivoBit, ".txt" );
 		
 		validarRename = rename("Bitacora.txt", nombreArchivoBit);
-		
-		strcpy(juego->nombreBitacora, nombreArchivoBit);
-		juego->lenNombreBit = strlen(nombreArchivoBit);
 	}
 	
 	/* Guardar el juego */

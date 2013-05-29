@@ -385,10 +385,8 @@ guardarJuego(char * nombreArchivo,tJuego * juego)
 	fwrite(&juego->puntos, sizeof(int), 1, archivo);
 	fwrite(&juego->movHileras, sizeof(int), 1, archivo);
 	fwrite(&juego->movColumnas, sizeof(int), 1, archivo);
-	fwrite(&juego->movMartillazos, sizeof(int), 1, archivo);
-	fwrite(&juego->cantJugadas, sizeof(int), 1, archivo);
-	e = fwrite(&juego->lenNombreBit, sizeof(int), 1, archivo);
-
+	e = fwrite(&juego->movMartillazos, sizeof(int), 1, archivo);
+	
 	if (e == 0)
 		return 0;
 	
@@ -404,9 +402,6 @@ guardarJuego(char * nombreArchivo,tJuego * juego)
 				return 0;
 		}
 	}
-	
-	fwrite(&juego->nombreBitacora, sizeof(char), juego->lenNombreBit, archivo);
-	fwrite(&juego->bitacora, sizeof(FILE), 1, archivo);
 	
 	fclose(archivo);
 	
@@ -470,7 +465,6 @@ leerArchivo(FILE * partidaGuardada, tJuego * juego)
 	fread(&juego->movHileras, sizeof(int), 1, partidaGuardada);
 	fread(&juego->movColumnas, sizeof(int), 1, partidaGuardada);
 	fread(&juego->movMartillazos, sizeof(int), 1, partidaGuardada);
-	fread(&juego->lenNombreBit, sizeof(int), 1, partidaGuardada);
 
 	juego->tablero = crearTablero(juego);
 
@@ -481,18 +475,7 @@ leerArchivo(FILE * partidaGuardada, tJuego * juego)
 			c = fgetc(partidaGuardada);
 			juego->tablero[i][j] = c - 'A' + 1;
 		}
-	}
-	
-	if (juego->conBitacora)
-	{
-		fread(&juego->bitacora, sizeof(char),juego->lenNombreBit, partidaGuardada);
-		fread(&juego->bitacora, sizeof(FILE), 1, partidaGuardada);
-		fopen(juego->nombreBitacora, "wt");
-	}
-
-	
-	
-	
+	}	
 
 	fclose(partidaGuardada);
 

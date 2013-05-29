@@ -31,8 +31,11 @@ typedef struct
 	int movColumnas;
 	int movMartillazos;
 	int cantJugadas;
+	int lenNombreBit;
 	char conBitacora;
 	char ** tablero;
+	char * nombreBitacora;
+	FILE * bitacora;
 	tJuegoUndo juegoUndo;
 } tJuego;
 

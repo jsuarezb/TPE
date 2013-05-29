@@ -273,6 +273,7 @@ recuperar(tJuego * juego)
 	char nombreArchivo[MAX_NOMBRE];
 	int lenArchivo;
 	
+	
 	nombreArchivoAux = malloc(MAX_NOMBRE*sizeof(char));
 
 	printf("Ingrese el nombre del archivo: ");
@@ -285,16 +286,18 @@ recuperar(tJuego * juego)
 
 	strncpy(nombreArchivo, nombreArchivoAux, lenArchivo);
 
-	partidaGuardada = fopen(nombreArchivo, "rb");
-	
-	char nombreArchivoBit[lenArchivo + 4];
-		
-	strcpy(nombreArchivoBit, nombreArchivo);
-	strcat(nombreArchivoBit, ".txt" );
-		
-	juego->bitacora = fopen(nombreArchivoBit, "r+");	
+	partidaGuardada = fopen(nombreArchivo, "rb");	
 	
 	leerArchivo(partidaGuardada, juego);
+	
+	if (juego->conBitacora)
+	{
+		char nombreArchivoBit[lenArchivo + 4];
+		strcpy(nombreArchivoBit, nombreArchivo);
+		strcat(nombreArchivoBit, ".txt" );
+		juego->bitacora = fopen(nombreArchivoBit, "a");
+		/* Ver q onda con el juego->cantJugadas, se guarda? */
+	}
 	
 	return;
 }
@@ -435,13 +438,15 @@ hacerJugada(tJuego * juego)
 	
 	if (juego->conBitacora)
 	{	
-		fprintf(juego->bitacora, "%d: ", juego->cantJugadas);
-		
 		if (jugadaValidada == 5)
+		{
+			fprintf(juego->bitacora, "%d: ", juego->cantJugadas);
 			fprintf(juego->bitacora, "undo \n", NULL);
+		}
 		
 		if (jugadaValidada >= 1 && jugadaValidada <= 4)
 		{
+			fprintf(juego->bitacora, "%d: ", juego->cantJugadas);
 			fprintf(juego->bitacora, "%c ", accion[jugadaValidada - 1]);
 			/* Si es necesario imprimir dos coordenadas */
 			if (jugada.punto.x != -1 && jugada.punto.y != -1)

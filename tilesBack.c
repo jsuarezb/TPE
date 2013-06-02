@@ -19,22 +19,22 @@ crearTablero(tJuego * juego)
 	/* Creacion de filas */
 	juego->tablero = malloc(juego->alto * sizeof(char *));
 	juego->juegoUndo.tableroUndo = malloc(juego->alto * sizeof(char *));
-	
+
 	for (i = 0; i < juego->alto; i++)
 	{
 		/* Creacion de columnas */
 		juego->tablero[i] = malloc(juego->ancho * sizeof(char));
 		juego->juegoUndo.tableroUndo[i] = malloc(juego->ancho * sizeof(char *));
-		
+
 		for (j = 0; j < juego->ancho; j++)
 			juego->tablero[i][j] = rand() % (juego->nivelActual + 1) + 1;
 			juego->juegoUndo.tableroUndo[i][j] = juego->tablero[i][j];
 
 	}
-	
-	
+
+
 	return juego->tablero;
-	
+
 }
 
 /* eliminar(int color, tPunto punto, tJuego * juego)
@@ -49,11 +49,11 @@ eliminar(int color, tPunto punto, tJuego * juego)
 {
 	int i, j = 0;
 	tPunto puntosAdyacentes[4];
-	
+
 	/* Validacion del punto */
 	if (validarPunto(punto.x, punto.y, juego) != PUNTO_VALIDO)
 		return 0;
-	
+
 	if (juego->tablero[punto.y][punto.x] != color)
 		return 0;
 	else
@@ -61,12 +61,12 @@ eliminar(int color, tPunto punto, tJuego * juego)
 		/* Eliminacion */
 		juego->tablero[punto.y][punto.x] = 0;
 		crearAdyacentes(punto, puntosAdyacentes);
-	
+
 		/* Eliminar si corresponde los puntos
 		* izquierda - arriba - abajo - derecha */
 		for (i = 0; i < 4; i++)
 			j += eliminar(color, puntosAdyacentes[i], juego);
-			
+
 		return 1 + j;
 	}
 }
@@ -95,19 +95,19 @@ int
 eliminarHilera(int hilera, tJuego * juego)
 {
 	int i, hayAzulejoVacio = 1, azulejos = 0;
-	
+
 	/* Verifica que al menos un azulejo no este vacio en la hilera */
 	for (i = 0; i < juego->ancho && hayAzulejoVacio; i++)
 	{
 		if (juego->tablero[hilera][i] != 0)
 			hayAzulejoVacio = 0;
-			
+
 	}
-	
+
 	if (hayAzulejoVacio)
 		return 0;
-		
-		
+
+
 	/* Ejecuta la eliminacion de la hilera */
 	for (i = 0; i < juego->ancho; i++)
 	{
@@ -119,7 +119,7 @@ eliminarHilera(int hilera, tJuego * juego)
 	}
 
 	juego->movHileras--;
-	
+
 	return azulejos;
 }
 
@@ -128,14 +128,14 @@ int
 eliminarColumna(int columna, tJuego * juego)
 {
 	int i, azulejos = 0;
-	
+
 	/* Verifica que el azulejo inferior no esté vacío.
 	 * Tener en cuenta que ya se aplicó la gravedad al tablero
 	 * pasado el movimiento anterior. */
-		
+
 	if (juego->tablero[juego->alto - 1][columna] == 0)
 			return 0;
-		
+
 	/* Ejecuta la eliminacion de la hilera.
 	 * Es necesario recorrerla toda, ya que el azulejo más
 	 * a la derecha puede ser el único no vacío. */
@@ -147,7 +147,7 @@ eliminarColumna(int columna, tJuego * juego)
 	}
 
 	juego->movColumnas--;
-	
+
 	return azulejos;
 }
 
@@ -158,7 +158,7 @@ int
 eliminarMartillazo(tPunto punto, tJuego * juego)
 {
 	int i, j, azulejosEliminados = 0;
-	
+
 	/* Se vacian los alrededores y el centro */
 	for (i = punto.y - 1; i <= punto.y + 1; i++)
 	{
@@ -174,9 +174,9 @@ eliminarMartillazo(tPunto punto, tJuego * juego)
 			}
 		}
 	}
-	
+
 	juego->movMartillazos--;
-	
+
 	return azulejosEliminados;
 }
 
@@ -188,30 +188,30 @@ hayColorAdyacente(tPunto punto, tJuego * juego)
 {
 	int color, i, hayAdyacente = 0, x, y;
 	tPunto adyacentes[4];
-	
+
 	if (PUNTO_FUERA(punto.x, juego->ancho) || PUNTO_FUERA(punto.y, juego->alto)
 	|| juego->tablero[punto.y][punto.x] == 0)
 	{
 		return 0;
 	}
-	
+
 	color = juego->tablero[punto.y][punto.x];
-	
+
 	crearAdyacentes(punto, adyacentes);
-	
+
 	for (i = 0; i < 4 && !hayAdyacente; i++)
 	{
 		x = adyacentes[i].x;
 		y = adyacentes[i].y;
-		
+
 		/* Validacion del punto cuando si no esta dentro del tablero */
 		if (PUNTO_FUERA(x, juego->ancho) || PUNTO_FUERA(y, juego->alto))
 			continue;
-		
+
 		if (juego->tablero[y][x] == color)
 			hayAdyacente = 1;
 	}
-	
+
 	return hayAdyacente;
 }
 
@@ -225,7 +225,7 @@ crearAdyacentes(tPunto punto, tPunto adyacentes[])
 	{
 		/* Simplificacion de las posiciones de x: {x-1, x, x, x+1} */
 		adyacentes[i].x = punto.x + (i+1) / 2 - 1;
-		
+
 		/* Posiciones de y: {x, x-1, x+1, x} */
 		switch (i)
 		{
@@ -258,7 +258,7 @@ reacomodarTablero( tJuego * juego )
 	for (j = 0; j < juego->ancho; j++) 
 	{
 		ultimaPosY = juego->alto - 1;
-		
+
 		/* Reacomoda los Azulejos para abajo.*/
 		for (i = juego->alto - 1; i >= 0; i--)
 		{
@@ -270,11 +270,11 @@ reacomodarTablero( tJuego * juego )
 					juego->tablero[ultimaPosY][j] = juego->tablero[i][j];
 					juego->tablero[i][j] = 0;
 				}
-			
+
 				ultimaPosY--;
 			}
 		}
-		
+
 		/* Movimiento hacia la izquierda de las columnas */
 		if (juego->tablero[juego->alto - 1][j] != 0)
 		{
@@ -317,14 +317,14 @@ verificaMatriz(tJuego * juego)
 		{
 			punto.x = i;
 			punto.y = j;
-			
+
 			/* Es posible seguir jugando */
 			if (hayColorAdyacente(punto, juego))
 				return SEGUIR_JUGANDO;
 
 		}
 	}
-	
+
 	if (hayPoderes(juego))
 		return SEGUIR_JUGANDO;
 	else 
@@ -338,7 +338,7 @@ hayPoderes(tJuego * juego)
 
 	if(juego->movHileras != 0 || juego->movColumnas != 0 || juego->movMartillazos != 0)
 		estado = 1;
-	
+
 	return estado;
 }
 
@@ -347,20 +347,20 @@ calcularPuntos(int azulejosEliminados, tJuego * juego)
 {
 	int pts;
 	int totalAzulejos;
-	
+
 	totalAzulejos = juego->ancho * juego->alto;
-	
+
 	if(azulejosEliminados == 1)
 		pts = 1;
 	else if(azulejosEliminados < totalAzulejos * 0.3)
 		pts = 2 * azulejosEliminados;
-		
+
 		else if(azulejosEliminados < totalAzulejos * 0.6)
 			pts = 3 * azulejosEliminados;
-			
+
 			else
 				pts = 4 * azulejosEliminados;
-		
+
 	return pts;
 }
 
@@ -370,9 +370,9 @@ guardarJuego(char * nombreArchivo,tJuego * juego)
 	FILE * archivo;
 	char c;
 	int e, i, j;
-	
+
 	archivo = fopen(nombreArchivo, "wb");
-	
+
 	if (archivo == NULL)
 		return 0;
 
@@ -386,10 +386,10 @@ guardarJuego(char * nombreArchivo,tJuego * juego)
 	fwrite(&juego->movHileras, sizeof(int), 1, archivo);
 	fwrite(&juego->movColumnas, sizeof(int), 1, archivo);
 	e = fwrite(&juego->movMartillazos, sizeof(int), 1, archivo);
-	
+
 	if (e == 0)
 		return 0;
-	
+
 	/* Escritura de tablero */
 	for (i = 0; i < juego->alto; i++)
 	{
@@ -397,14 +397,14 @@ guardarJuego(char * nombreArchivo,tJuego * juego)
 		{
 			c = juego->tablero[i][j];
 			e = fputc((c != 0) ? (c + 'A' - 1) : '0', archivo);
-			
+
 			if (e == EOF)
 				return 0;
 		}
 	}
-	
+
 	fclose(archivo);
-	
+
 	return 1;
 }
 
@@ -412,7 +412,7 @@ void
 bonus(tJuego * juego)
 {	
 	int totalAzulejos = juego->ancho * juego->alto;
-	
+
 	juego->movHileras++;
 	juego->movColumnas++;
 	juego->movMartillazos++;
@@ -433,7 +433,7 @@ bonus(tJuego * juego)
 
 	return;
 }		
-	
+
 
 void
 initJuego(tJuego * juego)
@@ -453,9 +453,9 @@ leerArchivo(FILE * partidaGuardada, tJuego * juego)
 {	
 	int i, j;
 	char c;
-	
+
 	/* Escritura de datos basicos */
-	
+
 	fread(&juego->alto, sizeof(int), 1, partidaGuardada); /* Filas */
 	fread(&juego->ancho, sizeof(int), 1, partidaGuardada); /* Columnas */
 	fread(&juego->nivelMaximo, sizeof(int), 1, partidaGuardada);
@@ -473,7 +473,7 @@ leerArchivo(FILE * partidaGuardada, tJuego * juego)
 		for (j = 0; j < juego->ancho; j++)
 		{
 			c = fgetc(partidaGuardada);
-			juego->tablero[i][j] = c - 'A' + 1;
+			juego->tablero[i][j] = (c != '0') ? c - 'A' + 1 : 0;
 		}
 	}	
 
@@ -485,28 +485,28 @@ leerArchivo(FILE * partidaGuardada, tJuego * juego)
 void
 liberarTablero()
 {
-	
+
 }
 
 void
 juegoUndo(tJuego * juego)
 {
 	int i, j;	
-	
+
 	/* Copia el tablero */
 	for (i = 0; i < juego->alto; i++)
 	{
-		
+
 		for (j = 0; j < juego->ancho; j++)
 			juego->juegoUndo.tableroUndo[i][j] = juego->tablero[i][j];
 
 	}
-	
+
 	juego->juegoUndo.movHileras = juego->movHileras;
 	juego->juegoUndo.movColumnas = juego->movColumnas;
 	juego->juegoUndo.movMartillazos = juego->movMartillazos;
 	juego->juegoUndo.puntos = juego->puntos;
-	
+
 	return;
 }
 
@@ -514,28 +514,20 @@ void
 undo(tJuego * juego)
 {
 	int i, j;	
-	
+
 	for (i = 0; i < juego->alto; i++)
 	{
-		
+
 		for (j = 0; j < juego->ancho; j++)
 			juego->tablero[i][j] = juego->juegoUndo.tableroUndo[i][j];
 
 	}
-	
+
 	juego->movHileras = juego->juegoUndo.movHileras;
 	juego->movColumnas = juego->juegoUndo.movColumnas;
 	juego->movMartillazos = juego->juegoUndo.movMartillazos;
 	juego->puntos = juego->juegoUndo.puntos;
-	
-	
+
+
 	return;
 }
-
-
-
-
-
-
-
-

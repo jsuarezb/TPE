@@ -6,9 +6,6 @@
 /* Enums */
 enum {E, H, C, M, UNDO, SAVE, QUIT};
 
-/* Enum correspondiente a la varialble jugadaValidada */
-enum {ELIMINAR = 1, MARTILLAZO, COLUMNA, HILERA, UNDO_B};
-
 /* Funciones */
 
 static void correrColumna(int posAnterior, int posNueva, tJuego * juego);
@@ -534,40 +531,6 @@ undo(tJuego * juego)
 
 	return;
 }
-
-void
-conBitacora(tJuego * juego, tJugada jugada, int jugadaValidada, char args[])
-{
-	switch(jugadaValidada)
-	{
-		case ELIMINAR:
-			fprintf(juego->bitacora, "%d: e %s", juego->cantJugadas, args);			
-			break;
-		case MARTILLAZO:
-			fprintf(juego->bitacora, "%d: m %s", juego->cantJugadas, args);
-			break;
-		case COLUMNA:
-			fprintf(juego->bitacora, "%d: c %s", juego->cantJugadas, args);
-			break;
-		case HILERA:
-			fprintf(juego->bitacora, "%d: h %s", juego->cantJugadas, args);
-			break;
-		case UNDO_B:
-			fprintf(juego->bitacora, "%d: undo", juego->cantJugadas);
-			break;
-	}
-	if(jugada.azulejosEliminados > 0)
-		{
-			fprintf(juego->bitacora,"; %d \n", jugada.azulejosEliminados);
-			juego->cantJugadas++;
-		}
-	if (jugada.azulejosEliminados == 0 && jugadaValidada >= 1 && jugadaValidada <= 5)
-		{
-			fprintf(juego->bitacora,"\n", NULL);
-			juego->cantJugadas++;
-		}
-}
-	
 	
 	
 	

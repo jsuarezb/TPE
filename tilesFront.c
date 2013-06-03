@@ -112,7 +112,7 @@ analizarOpcion(int opcion, tJuego * juego)
 			for (i = 0; i < juego->alto; i++)
 			{
 				for (j = 0; j < juego->ancho; j++)
-					fprintf(juego->bitacora, "%d", juego->tablero[i][j]);		
+					fprintf(juego->bitacora, "%c", juego->tablero[i][j] + 'A' - 1);		
 				fprintf(juego->bitacora, "\n", NULL);
 			}
 
@@ -297,7 +297,16 @@ recuperar(tJuego * juego)
 		strcpy(nombreArchivoBit, nombreArchivo);
 		strcat(nombreArchivoBit, ".txt" );
 		juego->bitacora = fopen(nombreArchivoBit, "a");
-		/* Ver q onda con el juego->cantJugadas, se guarda? */
+		/*
+		int cantJugadasAux;
+		char lineaAux[MAX_CHARS] = {0};
+		while (!feof(juego->bitacora))
+		{
+			fgets(lineaAux , MAX_CHARS, juego->bitacora);
+		}
+		sscanf(lineaAux, "%d:", cantJugadasAux);
+		printf("cantJugadasAux: %d\n", cantJugadasAux);
+		*/
 	}
 
 	return;
@@ -341,6 +350,7 @@ imprimirTablero(tJuego * juego)
 int
 pedirJugada(char comandos[][5], size_t cantComandos, char args[])
 {
+	
 	char * entrada = calloc(MAX_CHARS + 1, sizeof(char)), * e,
 	comando[MAX_CHARS] = {0};
 	
@@ -360,8 +370,10 @@ pedirJugada(char comandos[][5], size_t cantComandos, char args[])
 	sscanf(entrada, "%s", (char *) &comando);
 	
 	/* Almacena los argumentos a leer (si es que hay) */
-	strcpy(args, entrada + strlen(comando));
+	/* Quita el \0 y \n del fgets */
+	strncpy(args, entrada + strlen(comando), strlen(entrada) - 2);
 	
+		
 	/* Compara el comando leído con los comandos del argumento */
 	for (i = 0; i < cantComandos; i++)
 	{
@@ -429,32 +441,8 @@ hacerJugada(tJuego * juego)
 	}
 
 	if (juego->conBitacora)
-	{	
-		if (jugadaValidada == 5)
-		{
-			fprintf(juego->bitacora, "%d: ", juego->cantJugadas);
-			fprintf(juego->bitacora, "undo \n", NULL);
-		}
-
-		if (jugadaValidada >= 1 && jugadaValidada <= 4)
-		{
-			fprintf(juego->bitacora, "%d: ", juego->cantJugadas);
-			fprintf(juego->bitacora, "%c ", accion[jugadaValidada - 1]);
-			/* Si es necesario imprimir dos coordenadas */
-			if (jugada.punto.x != -1 && jugada.punto.y != -1)
-				fprintf(juego->bitacora, "%d, %d", jugada.punto.y, jugada.punto.x);
-			if (jugada.punto.x == -1)
-				fprintf(juego->bitacora, "%d", jugada.punto.y);
-			if (jugada.punto.y == -1)
-				fprintf(juego->bitacora, "%d", jugada.punto.x);
-
-			if(jugada.azulejosEliminados > 0)
-				fprintf(juego->bitacora,"; %d \n", jugada.azulejosEliminados);
-		}
-
-		juego->cantJugadas++;
-
-	}
+		conBitacora(juego, jugada, jugadaValidada, args);
+	
 
 	return jugada.azulejosEliminados;
 }

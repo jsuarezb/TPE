@@ -231,7 +231,7 @@ comenzarJuego(tJuego * juego)
 				for (i = 0; i < juego->alto; i++)
 				{
 					for (j = 0; j < juego->ancho; j++)
-						fprintf(juego->bitacora, "%d", juego->tablero[i][j]);
+						fprintf(juego->bitacora, "%c", juego->tablero[i][j] + 'A' - 1);
 
 					fprintf(juego->bitacora, "\n", NULL);
 				}
@@ -293,20 +293,24 @@ recuperar(tJuego * juego)
 
 	if (juego->conBitacora)
 	{
+		int cantJugadasAux = 0;
+		char lineaAux[MAX_CHARS];
 		char nombreArchivoBit[lenArchivo + 4];
 		strcpy(nombreArchivoBit, nombreArchivo);
 		strcat(nombreArchivoBit, ".txt" );
-		juego->bitacora = fopen(nombreArchivoBit, "a");
-		/*
-		int cantJugadasAux;
-		char lineaAux[MAX_CHARS] = {0};
+		
+		/* Abre el la bitacora en modo "r" para el correcto uso de fgets */
+		juego->bitacora = fopen(nombreArchivoBit, "r");
+		
+		/* Obtiene el ultimo cantJugadas de la bitacora */		
 		while (!feof(juego->bitacora))
 		{
 			fgets(lineaAux , MAX_CHARS, juego->bitacora);
 		}
-		sscanf(lineaAux, "%d:", cantJugadasAux);
-		printf("cantJugadasAux: %d\n", cantJugadasAux);
-		*/
+		sscanf(lineaAux, "%u", &cantJugadasAux);
+		juego->cantJugadas == cantJugadasAux;
+		
+		juego->bitacora = fopen(nombreArchivoBit, "a");
 	}
 
 	return;
@@ -377,6 +381,7 @@ pedirJugada(char comandos[][5], size_t cantComandos, char args[])
 	/* Compara el comando leído con los comandos del argumento */
 	for (i = 0; i < cantComandos; i++)
 	{
+		/* strcmp devuelve cero cuando ingresas cualquier cosa y te lo toma como un eliminar */
 		if (strcmp(comando, comandos[i]) == 0)
 		{
 			free(entrada);
@@ -407,7 +412,15 @@ hacerJugada(tJuego * juego)
 		printf("Ingresar accion:\n");
 		jugadaValidada = pedirJugada(acciones, 7, args) + 1;
 	} while (jugadaValidada == ERROR);
-
+	
+	if (juego->conBitacora)
+	{
+		if (jugadaValidada >= 1 && jugadaValidada <= 4)
+			fprintf(juego->bitacora, "%d: %c%s", juego->cantJugadas, accion[jugadaValidada - 1], args);
+		if (jugadaValidada == 5)
+			fprintf(juego->bitacora, "%d: undo", juego->cantJugadas);
+	}
+	
 	/* Crea una copia auxiliar del juego */
 
 	if (jugadaValidada >= ELIMINAR && jugadaValidada <= HILERA)
@@ -439,10 +452,20 @@ hacerJugada(tJuego * juego)
 			printf("Jugada no reconocida\n");
 			break;
 	}
-
-	if (juego->conBitacora)
-		conBitacora(juego, jugada, jugadaValidada, args);
 	
+	if (juego->conBitacora)
+	{
+		if(jugada.azulejosEliminados > 0)
+		{
+			fprintf(juego->bitacora,"; %d \n", jugada.azulejosEliminados);
+			juego->cantJugadas++;
+		}
+		if (jugada.azulejosEliminados == 0 && jugadaValidada >= 1 && jugadaValidada <= 5)
+		{
+			fprintf(juego->bitacora,"\n", NULL);
+			juego->cantJugadas++;
+		}
+	}
 
 	return jugada.azulejosEliminados;
 }
@@ -593,7 +616,7 @@ guardarWrapper(tJuego * juego, const char args[])
 {
 	char * nombreArchivo = calloc(MAX_CHARS, sizeof(char)), c;
 	int i = 0, estado;
-	int validarRename = 0;
+
 
 	sscanf(args, "%s", nombreArchivo);
 
@@ -606,7 +629,7 @@ guardarWrapper(tJuego * juego, const char args[])
 		strcpy(nombreArchivoBit, nombreArchivo);
 		strcat(nombreArchivoBit, ".txt" );
 
-		validarRename = rename("Bitacora.txt", nombreArchivoBit);
+		rename("Bitacora.txt", nombreArchivoBit);
 	}
 
 	/* Guardar el juego */
@@ -617,8 +640,7 @@ guardarWrapper(tJuego * juego, const char args[])
 		printf("\"%s\" guardado correctamente\n", nombreArchivo);
 	else
 		printf("Hubo un problema al guardar el juego\n");
-	if (validarRename != 0)
-		printf("La bitacora no pudo ser guardada. \n");
+
 
 
 

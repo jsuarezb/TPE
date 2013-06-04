@@ -9,6 +9,7 @@
 #define _tilesBack_h
 
 #include <stdio.h>
+#define MAX_CHARS 80
 
 enum {PUNTO_VALIDO, PUNTO_VACIO, FUERA_RANGO};
 enum {PROXIMO_NIVEL, SEGUIR_JUGANDO, GAME_OVER, VICTORIA};
@@ -35,6 +36,7 @@ typedef struct
 	int cantJugadas;
 	char conBitacora;
 	char ** tablero;
+	char nombreJuego[MAX_CHARS];
 	FILE * bitacora;
 	tJuegoUndo juegoUndo;
 } tJuego;
@@ -88,18 +90,6 @@ int eliminarColumna(int columna, tJuego * juego);
 int eliminarMartillazo(tPunto punto, tJuego * juego);
 
 /*
-** Crea un arreglo de puntos adyacentes al punto dado
-** Modo de uso:
-** crearAdyacentes(punto, puntos[4]);
-** crea los puntos:
-** puntos[0] = {puntos.x - 1, punto.y}
-** puntos[1] = {puntos.x, punto.y - 1}
-** puntos[2] = {puntos.x, punto.y + 1}
-** puntos[3] = {puntos.x + 1, punto.y}
-*/
-void crearAdyacentes(tPunto punto, tPunto adyacentes[]);
-
-/*
 ** Devuelve si existe algun azulejo adyacentes al azulejo en 'punto' 
 ** con el mismo color del azulejo en 'punto'
 ** Modo de uso:
@@ -127,6 +117,8 @@ void recuperarJuego(FILE * partidaGuardada, tJuego * juego);
 
 void undo(tJuego * juego);
 
-void juegoUndoUndo(tJuego * juego);
+void juegoUndo(tJuego * juego);
+
+void liberarTablero(char ** tablero, int alto);
 
 #endif

@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include "tilesBack.h"
 #include "getnum.h"
-#include <string.h>
 #define MIN_DIM 3
 #define MAX_DIM 40
-#define MAX_CHARS 80
-#define MAX_NOMBRE 50
 #define VALIDAR_AUX(x) ((x) != ' ' && (x) != '\n')
 
 /* Enums */
@@ -26,10 +24,10 @@ int menuNuevo(); // Crea menu nuevo y devuelve opcion elegida
 void comenzarJuego(); // Comienza el juego
 int recuperar(tJuego * juego);
 int hacerJugada(tJuego * juego);
-tJugada eliminarWrapper(tJuego * juego, char args[]);
-tJugada columnaWrapper(tJuego * juego, const char args[]);
-tJugada hileraWrapper(tJuego * juego, const char args[]);
-tJugada martillazoWrapper(tJuego * juego, const char args[]);
+int eliminarWrapper(tJuego * juego, char args[]);
+int columnaWrapper(tJuego * juego, const char args[]);
+int hileraWrapper(tJuego * juego, const char args[]);
+int martillazoWrapper(tJuego * juego, const char args[]);
 void guardarWrapper(tJuego * juego, const char args[]);
 
 
@@ -110,8 +108,9 @@ analizarOpcion(int opcion, tJuego * juego)
 		case JUEGO_BITACORA:
 			juego->conBitacora = 1;
 			juego->cantJugadas = 0;
+			strcpy(juego->nombreJuego, "Bitacora.txt");
 			
-			juego->bitacora = fopen("Bitacora.txt", "wt");
+			juego->bitacora = fopen(juego->nombreJuego, "wt");
 			
 			/* Peticion de datos al usuario */
 			pedirDimensiones(juego);
@@ -223,7 +222,7 @@ comenzarJuego(tJuego * juego)
 		printf("c: %d, ", juego->movColumnas);
 		printf("m: %d\n", juego->movMartillazos);
 
-		estadoTablero = verificaMatriz(juego); /* TODO: ver si no se puede enviar hacia el fondo de la funcion */
+		estadoTablero = verificaMatriz(juego);
 
 		/* Pasar al próximo nivel */
 		if (estadoTablero == PROXIMO_NIVEL)
@@ -296,22 +295,20 @@ comenzarJuego(tJuego * juego)
 		
 	return;
 }
-
-/* TODO: validar el fopen y fijarse si no es mas efectivo hacerlo con getchar*/
  
 int
 recuperar(tJuego * juego)
 {
 	FILE * partidaGuardada = NULL;
-	char * nombreArchivoAux, nombreArchivo[MAX_NOMBRE];
-	char lineaAux[MAX_CHARS] = {0}, nombreArchivoBit[MAX_NOMBRE + 4];
+	char * nombreArchivoAux, nombreArchivo[MAX_CHARS], val;
+	char lineaAux[MAX_CHARS] = {0}, nombreArchivoBit[MAX_CHARS + 4];
 	int lenArchivo, cantJugadasAux = 0;
 
-	nombreArchivoAux = calloc(MAX_NOMBRE, sizeof(char));
+	nombreArchivoAux = calloc(MAX_CHARS, sizeof(char));
 
 	printf("Ingrese el nombre del archivo: ");
 
-	fgets(nombreArchivoAux, MAX_NOMBRE, stdin);
+	fgets(nombreArchivoAux, MAX_CHARS, stdin);
 
 	lenArchivo = strlen(nombreArchivoAux) - 1;
 
@@ -320,7 +317,7 @@ recuperar(tJuego * juego)
 
 	/* Recuperar el juego */
 	partidaGuardada = fopen(nombreArchivo, "rb");
-	/* TODO: mem leak? */
+
 	if (partidaGuardada == NULL)
 	{
 		printf("No fue posible abrir el archivo \"%s\"\n", nombreArchivo);
@@ -337,6 +334,8 @@ recuperar(tJuego * juego)
 		strcpy(nombreArchivoBit, nombreArchivo);
 		strcat(nombreArchivoBit, ".txt" );
 
+		strcpy(juego->nombreJuego, nombreArchivoBit);
+
 		/* Abre la bitacora en modo "r" para el correcto uso de fgets */
 		juego->bitacora = fopen(nombreArchivoBit, "r");
 		if (juego->bitacora == NULL)
@@ -350,10 +349,8 @@ recuperar(tJuego * juego)
 		while (!feof(juego->bitacora))
 			fgets(lineaAux, MAX_CHARS, juego->bitacora);
 		
-		sscanf(lineaAux, "%d:", &cantJugadasAux);
-		/* TODO: validar el scanf para que no lea cualquier caracter */
+		val = sscanf(lineaAux, "%d:", &cantJugadasAux);
 		juego->cantJugadas = cantJugadasAux;
-
 		juego->bitacora = fopen(nombreArchivoBit, "a");
 	}
 
@@ -413,9 +410,16 @@ pedirJugada(char comandos[][5], size_t cantComandos, char args[])
 	/* Validacion de la lectura o...
 	 * se supero el limite de 80 caracteres en la lectura */
 
-	if (e == NULL || entrada[MAX_CHARS] != '\0')
+	if (e == NULL || entrada[0] == '\n')
 	{
-		/* TODO: validar la superacion de MAX_CHARS en entrada */ 
+		free(entrada);
+		return -1;
+	}
+
+	if (entrada[MAX_CHARS - 1] != '\0' && entrada[MAX_CHARS - 1] != '\n')
+	{
+		while (getchar() != '\n');
+
 		free(entrada);
 		return -1;
 	}
@@ -430,14 +434,13 @@ pedirJugada(char comandos[][5], size_t cantComandos, char args[])
 	for (i = 0; i < cantComandos; i++)
 	{
 		/* strcmp devuelve cero cuando ingresas cualquier cosa y te lo toma como un eliminar */
-		if (strcmp(comando, comandos[i]) == 0)
+		if (strcmp(comandos[i], comando) == 0)
 		{
 			free(entrada);
 			return i;
 		}
 	}
-	
-	/* TODO: validacion de comandos vacios */
+
 	free(entrada);
 	return -1;
 }
@@ -450,17 +453,18 @@ hacerJugada(tJuego * juego)
 	char acciones[][5]={"e", "m", "c", "h", "undo", "save", "quit"};
 	char accion[4] = {"emch"};
 	char args[MAX_CHARS] = {0};
-	int jugadaValidada;
-	tJugada jugada;
+	int jugadaValidada, azulejosEliminados = 0;
 
-	jugada.azulejosEliminados = 0;
+	printf("Ingresar comando:\n");
+	/* Se adiciona 1 ya que retorna el indice de la coincidencia */
+	jugadaValidada = pedirJugada(acciones, 7, args) + 1;
 
-	do
+	while (jugadaValidada == ERROR)
 	{
-		printf("Ingresar accion:\n");
+		printf("Comando no valido:\n");
 		/* Se adiciona 1 ya que retorna el indice de la coincidencia */
 		jugadaValidada = pedirJugada(acciones, 7, args) + 1;
-	} while (jugadaValidada == ERROR);
+	}
 
 	if (juego->conBitacora)
 	{
@@ -477,16 +481,16 @@ hacerJugada(tJuego * juego)
 	switch(jugadaValidada)
 	{
 		case ELIMINAR:
-			jugada = eliminarWrapper(juego, args);
+			azulejosEliminados = eliminarWrapper(juego, args);
 			break;
 		case MARTILLAZO:
-			jugada = martillazoWrapper(juego, args);
+			azulejosEliminados = martillazoWrapper(juego, args);
 			break;
 		case COLUMNA:
-			jugada = columnaWrapper(juego, args);
+			azulejosEliminados = columnaWrapper(juego, args);
 			break;
 		case HILERA:
-			jugada = hileraWrapper(juego, args);
+			azulejosEliminados = hileraWrapper(juego, args);
 			break;
 		case UNDO:
 			undo(juego);
@@ -504,32 +508,29 @@ hacerJugada(tJuego * juego)
 	/* Imprime en bitacora si es una jugada a imprimir */
 	if (juego->conBitacora && jugadaValidada >= ELIMINAR && jugadaValidada <= UNDO)
 	{
-		if(jugada.azulejosEliminados > 0)
-			fprintf(juego->bitacora,"; %d \n", jugada.azulejosEliminados);
+		if(azulejosEliminados > 0)
+			fprintf(juego->bitacora,"; %d \n", azulejosEliminados);
 		else
 			fprintf(juego->bitacora,"\n", NULL);
 			
 		juego->cantJugadas++;
 	}
 
-	return jugada.azulejosEliminados;
+	return azulejosEliminados;
 }
 
 /* Funcion que valida los parametros del comando "e" y
  * ejecuta la funcion eliminar retornando los valores de la jugada hecha */
-tJugada
+int
 eliminarWrapper(tJuego * juego, char args[])
 {
 	char c;
 	int x, y, argumentos = 0, estado;
-	tPunto punto; /* TODO: verificar utilidad de tPunto, es necesario? */
 	tJugada jugada;
 
 	jugada.azulejosEliminados = 0;
 
 	argumentos = sscanf(args, "%d, %d%c", &y, &x, &c);
-	punto.x = x;
-	punto.y = y;
 
 	if (argumentos == 3 && c == '\n')
 	{		
@@ -541,10 +542,10 @@ eliminarWrapper(tJuego * juego, char args[])
 				jugada.punto.x = x;
 				jugada.punto.y = y;
 
-				if (!hayColorAdyacente(punto, juego))
+				if (!hayColorAdyacente(jugada.punto, juego))
 				{
-					printf("El punto (%d, %d) no tiene colores ady.\n", x, y);
-					return jugada;
+					printf("El punto (%d, %d) no tiene colores ady.\n", y, x);
+					return 0;
 				}
 				
 				/* Se guarda el juego para el undo sabiendo que eliminara
@@ -554,10 +555,10 @@ eliminarWrapper(tJuego * juego, char args[])
 				jugada.azulejosEliminados = eliminar(juego->tablero[y][x], jugada.punto, juego);
 				break;
 			case PUNTO_VACIO:
-				printf("El punto (%d, %d) esta vacio\n", x, y);
+				printf("El punto (%d, %d) esta vacio\n", y, x);
 				break;
 			case FUERA_RANGO:
-				printf("El punto (%d, %d) no esta dentro del tablero\n",  x, y);
+				printf("El punto (%d, %d) no esta dentro del tablero\n", y, x);
 				break;
 		}
 	}
@@ -566,10 +567,10 @@ eliminarWrapper(tJuego * juego, char args[])
 		printf("Argumentos incorrectos\n");
 	}
 
-	return jugada;
+	return jugada.azulejosEliminados;
 }
 
-tJugada
+int
 hileraWrapper(tJuego * juego, const char args[])
 {
 	char c;
@@ -596,15 +597,14 @@ hileraWrapper(tJuego * juego, const char args[])
 			if (hayAzulejoVacio)
 			{
 				printf("Imposible eliminar la hilera %d\n", y);
-				return jugada;
+				return 0;
 			}
-				
-			/* TODO: fix ejecucion de juegoUndo en caso de no poder eliminar */
+			
 			/* Se guarda el juego en caso de undo */
 			juegoUndo(juego);
 			
 			jugada.punto.x = -1; //Indicando que no hay coordenada X 
-			jugada.punto.y = y; /** TODO: fix */
+			jugada.punto.y = y;
 			jugada.azulejosEliminados = eliminarHilera(y, juego);
 
 		}
@@ -612,10 +612,10 @@ hileraWrapper(tJuego * juego, const char args[])
 			printf("Argumentos incorrectos\n");
 	}
 
-	return jugada;
+	return jugada.azulejosEliminados;
 }
 
-tJugada
+int
 columnaWrapper(tJuego * juego, const char args[])
 {
 	char c;
@@ -637,7 +637,7 @@ columnaWrapper(tJuego * juego, const char args[])
 			if (juego->tablero[juego->alto - 1][x] == 0)
 			{
 				printf("Imposible eliminar la columna %d\n", x);
-				return jugada;
+				return 0;
 			}
 				
 			/* Se guarda el juego en caso de undo */
@@ -653,10 +653,10 @@ columnaWrapper(tJuego * juego, const char args[])
 		}
 	}
 
-	return jugada;
+	return jugada.azulejosEliminados;
 }
 
-tJugada
+int
 martillazoWrapper(tJuego * juego, const char args[])
 {
 	char c;
@@ -687,10 +687,10 @@ martillazoWrapper(tJuego * juego, const char args[])
 					jugada.azulejosEliminados = eliminarMartillazo(jugada.punto, juego);
 					break;
 				case PUNTO_VACIO:
-					printf("El punto (%d, %d) esta vacio\n", x, y);
+					printf("El punto (%d, %d) esta vacio\n", y, x);
 					break;
 				case FUERA_RANGO:
-					printf("El punto (%d, %d) no esta dentro del tablero\n",  x, y);
+					printf("El punto (%d, %d) no esta dentro del tablero\n",  y, x);
 					break;
 			}
 		}
@@ -700,7 +700,7 @@ martillazoWrapper(tJuego * juego, const char args[])
 		}
 	}
 
-	return jugada;
+	return jugada.azulejosEliminados;
 }
 
 void
@@ -720,13 +720,13 @@ guardarWrapper(tJuego * juego, const char args[])
 	}
 
 	/* Renombre de Bitacora.txt al nuevo nombre */
-	/* TODO: renombre del nombre actual al nuevo nombre */
 	if (juego->conBitacora)
 	{
 		strcpy(nombreArchivoBit, nombreArchivo);
 		strcat(nombreArchivoBit, ".txt" );
 
-		rename("Bitacora.txt", nombreArchivoBit);
+		rename(juego->nombreJuego, nombreArchivoBit);
+		strcpy(juego->nombreJuego, nombreArchivoBit);
 	}
 
 	/* Guardar el juego */

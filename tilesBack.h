@@ -8,6 +8,8 @@
 #ifndef _tilesBack_h
 #define _tilesBack_h
 
+#include <stdio.h>
+
 enum {PUNTO_VALIDO, PUNTO_VACIO, FUERA_RANGO};
 enum {PROXIMO_NIVEL, SEGUIR_JUGANDO, GAME_OVER, VICTORIA};
 
@@ -55,7 +57,9 @@ typedef struct
 * de (alto) x (ancho) dimensiones con nivel colores
 * Modo de uso: crearTablero(juego);
 */ 
-char ** crearTablero(tJuego * juego);
+void crearTablero(tJuego * juego);
+
+void generarTablero(tJuego * juego);
 
 /* Elimina los azulejos adyacentes al punto 'punto' de color '1'
 ** en el tablero de 'juego'
@@ -119,7 +123,7 @@ void initJuego(tJuego * juego);
 
 void bonus(tJuego * juego);
 
-void leerArchivo(FILE * partidaGuardada, tJuego * juego);
+void recuperarJuego(FILE * partidaGuardada, tJuego * juego);
 
 void undo(tJuego * juego);
 

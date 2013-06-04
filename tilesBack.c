@@ -10,6 +10,7 @@ enum {E, H, C, M, UNDO, SAVE, QUIT};
 
 static void correrColumna(int posAnterior, int posNueva, tJuego * juego);
 static int hayPoderes(tJuego * juego);
+static void crearAdyacentes(tPunto punto, tPunto adyacentes[]);
 
 void
 crearTablero(tJuego * juego)
@@ -202,7 +203,7 @@ hayColorAdyacente(tPunto punto, tJuego * juego)
 }
 
 /* crea 4 puntos adyacentes a 'punto' y los deja en 'adyacentes' */
-void
+static void
 crearAdyacentes(tPunto punto, tPunto adyacentes[])
 {
 	int i;
@@ -237,15 +238,11 @@ reacomodarTablero( tJuego * juego )
 	int ultimaPosX = -1;
 	int ultimaPosY = juego->alto;
 
-	/*
-	** TODO: Hacerlo mas eficiente
-	*/
-
 	for (j = 0; j < juego->ancho; j++) 
 	{
 		ultimaPosY = juego->alto - 1;
 
-		/* Reacomoda los Azulejos para abajo.*/
+		/* Reacomoda los azulejos para abajo.*/
 		for (i = juego->alto - 1; i >= 0; i--)
 		{
 			if ( juego->tablero[i][j] != 0)

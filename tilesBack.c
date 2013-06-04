@@ -11,7 +11,7 @@ enum {E, H, C, M, UNDO, SAVE, QUIT};
 static void correrColumna(int posAnterior, int posNueva, tJuego * juego);
 static int hayPoderes(tJuego * juego);
 
-char **
+void
 crearTablero(tJuego * juego)
 {
 	int i, j;
@@ -25,16 +25,21 @@ crearTablero(tJuego * juego)
 		/* Creacion de columnas */
 		juego->tablero[i] = malloc(juego->ancho * sizeof(char));
 		juego->juegoUndo.tableroUndo[i] = malloc(juego->ancho * sizeof(char *));
+	}
+	
+	return;
+}
 
+void
+generarTablero(tJuego * juego)
+{
+	int i, j;
+	
+	for (i = 0; i < juego->alto; i++)
 		for (j = 0; j < juego->ancho; j++)
 			juego->tablero[i][j] = rand() % (juego->nivelActual + 1) + 1;
-			juego->juegoUndo.tableroUndo[i][j] = juego->tablero[i][j];
-
-	}
-
-
-	return juego->tablero;
-
+	
+	return;
 }
 
 /* eliminar(int color, tPunto punto, tJuego * juego)
@@ -94,19 +99,7 @@ validarPunto(int x, int y, tJuego * juego)
 int
 eliminarHilera(int hilera, tJuego * juego)
 {
-	int i, hayAzulejoVacio = 1, azulejos = 0;
-
-	/* Verifica que al menos un azulejo no este vacio en la hilera */
-	for (i = 0; i < juego->ancho && hayAzulejoVacio; i++)
-	{
-		if (juego->tablero[hilera][i] != 0)
-			hayAzulejoVacio = 0;
-
-	}
-
-	if (hayAzulejoVacio)
-		return 0;
-
+	int i, azulejos = 0;
 
 	/* Ejecuta la eliminacion de la hilera */
 	for (i = 0; i < juego->ancho; i++)
@@ -128,13 +121,6 @@ int
 eliminarColumna(int columna, tJuego * juego)
 {
 	int i, azulejos = 0;
-
-	/* Verifica que el azulejo inferior no esté vacío.
-	 * Tener en cuenta que ya se aplicó la gravedad al tablero
-	 * pasado el movimiento anterior. */
-
-	if (juego->tablero[juego->alto - 1][columna] == 0)
-			return 0;
 
 	/* Ejecuta la eliminacion de la hilera.
 	 * Es necesario recorrerla toda, ya que el azulejo más
@@ -441,7 +427,6 @@ initJuego(tJuego * juego)
 	/* Crear un tJuego para el juego nuevo seteando todas sus 
 	 * variables a los valores iniciales */
 	juego->puntos = 0;
-	/* Siendo 1 el primer nivel (aumenta al crear tablero nuevo) */
 	juego->nivelActual = 1; 
 	juego->movHileras = 1;
 	juego->movColumnas = 1;
@@ -449,13 +434,12 @@ initJuego(tJuego * juego)
 }
 
 void
-leerArchivo(FILE * partidaGuardada, tJuego * juego)
+recuperarJuego(FILE * partidaGuardada, tJuego * juego)
 {	
-	int i, j;
 	char c;
+	int i, j;
 
 	/* Escritura de datos basicos */
-
 	fread(&juego->alto, sizeof(int), 1, partidaGuardada); /* Filas */
 	fread(&juego->ancho, sizeof(int), 1, partidaGuardada); /* Columnas */
 	fread(&juego->nivelMaximo, sizeof(int), 1, partidaGuardada);
@@ -466,7 +450,7 @@ leerArchivo(FILE * partidaGuardada, tJuego * juego)
 	fread(&juego->movColumnas, sizeof(int), 1, partidaGuardada);
 	fread(&juego->movMartillazos, sizeof(int), 1, partidaGuardada);
 
-	juego->tablero = crearTablero(juego);
+	crearTablero(juego);
 
 	for (i = 0; i < juego->alto; i++)
 	{
@@ -475,17 +459,20 @@ leerArchivo(FILE * partidaGuardada, tJuego * juego)
 			c = fgetc(partidaGuardada);
 			juego->tablero[i][j] = (c != '0') ? c - 'A' + 1 : 0;
 		}
-	}	
-
-	fclose(partidaGuardada);
+	}
 
 	return;
 }
 
 void
-liberarTablero()
+liberarTablero(char ** tablero, int alto)
 {
-
+	int i;
+	
+	for (i = 0; i < alto; i++)
+		free(tablero[i]);
+		
+	free(tablero);
 }
 
 void
@@ -493,14 +480,10 @@ juegoUndo(tJuego * juego)
 {
 	int i, j;	
 
-	/* Copia el tablero */
+	/* Guarda el tablero */
 	for (i = 0; i < juego->alto; i++)
-	{
-
 		for (j = 0; j < juego->ancho; j++)
 			juego->juegoUndo.tableroUndo[i][j] = juego->tablero[i][j];
-
-	}
 
 	juego->juegoUndo.movHileras = juego->movHileras;
 	juego->juegoUndo.movColumnas = juego->movColumnas;
@@ -514,26 +497,16 @@ void
 undo(tJuego * juego)
 {
 	int i, j;	
-
+	
+	/* Recupera el tablero */
 	for (i = 0; i < juego->alto; i++)
-	{
-
 		for (j = 0; j < juego->ancho; j++)
 			juego->tablero[i][j] = juego->juegoUndo.tableroUndo[i][j];
-
-	}
 
 	juego->movHileras = juego->juegoUndo.movHileras;
 	juego->movColumnas = juego->juegoUndo.movColumnas;
 	juego->movMartillazos = juego->juegoUndo.movMartillazos;
 	juego->puntos = juego->juegoUndo.puntos;
 
-
 	return;
 }
-	
-	
-	
-	
-	
-	

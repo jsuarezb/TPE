@@ -9,8 +9,8 @@ enum {E, H, C, M, UNDO, SAVE, QUIT};
 /* Funciones */
 
 static void correrColumna(int posAnterior, int posNueva, tJuego * juego);
-static int hayPoderes(tJuego * juego);
 static void crearAdyacentes(tPunto punto, tPunto adyacentes[]);
+static int hayPoderes(tJuego * juego);
 
 void
 crearTablero(tJuego * juego)

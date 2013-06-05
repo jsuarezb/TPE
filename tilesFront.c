@@ -18,9 +18,9 @@ enum {ERROR, ELIMINAR, MARTILLAZO, COLUMNA, HILERA, UNDO, SAVE, QUIT};
 /* Funciones */
 void pedirDimensiones(tJuego * juego);
 void pedirNiveles(tJuego * juego);
+int menuNuevo(); // Crea menu nuevo y devuelve opcion elegida
 void imprimirTablero(tJuego * juego);
 void analizarOpcion(int opcion, tJuego * juego); // Actua de acuerdo a la opcion pasada
-int menuNuevo(); // Crea menu nuevo y devuelve opcion elegida
 void comenzarJuego(); // Comienza el juego
 int recuperar(tJuego * juego);
 int hacerJugada(tJuego * juego);
@@ -305,6 +305,12 @@ recuperar(tJuego * juego)
 	int lenArchivo, cantJugadasAux = 0;
 
 	nombreArchivoAux = calloc(MAX_CHARS, sizeof(char));
+	
+	if (nombreArchivoAux == NULL)
+	{
+		printf("Imposible recuperar archivo \"%s\"\n", nombreArchivo);
+		return 0;
+	}
 
 	printf("Ingrese el nombre del archivo: ");
 
@@ -404,6 +410,12 @@ pedirJugada(char comandos[][5], size_t cantComandos, char args[])
 	comando[MAX_CHARS] = {0};
 
 	int i, len;
+	
+	if (entrada == NULL)
+	{
+		printf("Imposible leer comandos\n");
+		return -1;
+	}
 
 	e = fgets(entrada, MAX_CHARS + 1, stdin);
 
@@ -709,6 +721,12 @@ guardarWrapper(tJuego * juego, const char args[])
 	char * nombreArchivo = calloc(MAX_CHARS, sizeof(char)), c, val;
 	char nombreArchivoBit[MAX_CHARS + 4] = {0};
 	int i = 0, estado;
+	
+	if (nombreArchivo == NULL)
+	{
+		printf("Imposible guardar el juego\n");
+		return;
+	}
 
 	val = sscanf(args, "%s%c", nombreArchivo, &c);
 	

@@ -86,7 +86,11 @@ int eliminarHilera(int hilera, tJuego * juego);
 */
 int eliminarColumna(int columna, tJuego * juego);
 
-/* */
+/* Elimina azulejos alrededor del punto indicado (inclusive) y
+** retorna el numero de azulejos eliminados
+** Modo de uso:
+** azulejosEliminados = eliminarHilera(4, juego)
+*/
 int eliminarMartillazo(tPunto punto, tJuego * juego);
 
 /*

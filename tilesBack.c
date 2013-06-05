@@ -15,17 +15,34 @@ static void crearAdyacentes(tPunto punto, tPunto adyacentes[]);
 void
 crearTablero(tJuego * juego)
 {
+	void * aux;
 	int i, j;
 
 	/* Creacion de filas */
-	juego->tablero = malloc(juego->alto * sizeof(char *));
-	juego->juegoUndo.tableroUndo = malloc(juego->alto * sizeof(char *));
+	aux = malloc(juego->alto * sizeof(char *));
+	
+	if (aux == NULL)
+		return;	
+	juego->tablero = aux;
+	
+	aux = malloc(juego->alto * sizeof(char *));
+	
+	if (aux == NULL)
+		return;
+	juego->juegoUndo.tableroUndo = aux;	
 
 	for (i = 0; i < juego->alto; i++)
 	{
 		/* Creacion de columnas */
-		juego->tablero[i] = malloc(juego->ancho * sizeof(char));
-		juego->juegoUndo.tableroUndo[i] = malloc(juego->ancho * sizeof(char *));
+		aux = malloc(juego->ancho * sizeof(char));
+		if (aux == NULL)
+			return;
+		juego->tablero[i] = aux;
+		
+		aux = malloc(juego->ancho * sizeof(char *));
+		if (aux == NULL)
+			return;
+		juego->juegoUndo.tableroUndo[i] = aux;
 	}
 	
 	return;
@@ -319,7 +336,8 @@ hayPoderes(tJuego * juego)
 {
 	int estado = 0;
 
-	if(juego->movHileras != 0 || juego->movColumnas != 0 || juego->movMartillazos != 0)
+	if(juego->movHileras != 0 || juego->movColumnas != 0
+								|| juego->movMartillazos != 0)
 		estado = 1;
 
 	return estado;

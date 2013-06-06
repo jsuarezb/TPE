@@ -1,0 +1,50 @@
+
+Bienvenidos a Azulejos. 
+
+Cada juego consiste en una serie de niveles en los que  se presenta un tablero 
+con diferentes colores,  habiendo en el primer nivel dos, en el segundo tres,  
+y así sucesivamente. 
+El objetivo del juego es eliminar la mayor cantidad de elementos en la menor
+cantidad de movimientos posibles. Quien logre eliminar todos los azulejos, 
+ganará! 
+
+Modo de Juego
+
+Para eliminar azulejos,  el usuario deberá seleccionar un grupo de azulejos 
+adyacentes del mismo color con el comando 'e x, y' donde x es la fila e y es la
+columna. Una vez que se eliminen un conjunto de azulejos,  el tablero se re 
+acomodará y el usuario podrá seguir jugando. Una vez eliminados todos los 
+azulejos de un nivel,  el usuario pasará de nivel,  donde un color más será 
+adicionado. 
+
+Cada jugador,  además, posee una serie de poneres especiales para usar a lo 
+largo del juego.  Con el comando 'h x'  el usuario podrá eliminar una hilera 
+entera de azulejos. Con el comando 'c y'  el usuario podrá eliminar una columna
+entera de azulejos.  Con el comando 'm x, y'  el usuario podrá eliminar un 
+azulejo junto a los 8 que lo rodean.  Los poderes eliminan azulejos,  
+independientemente del color.  Cada jugador incrementa su cantidad de poderes 
+disponibles por nivel,  además puede ser beneficiado con más, acorde a la 
+cantidad de puntos que realice en un nivel. 
+
+En caso de una jugada equivocada,  el jugador podrá ejecutar el comando 'undo'
+para deshacer un movimiento.  No se podrá realizar este movimiento dos veces 
+seguidas. 
+
+Guardar un juego 
+
+En cualquier momento,  el usuario podrá escribir 'save'  seguido del nombre 
+deseado,  y la partida se guardará con ese nombre. El jugador podrá recuperar
+el juego en otro momento. 
+
+Salir del juego
+
+En cualquier momento,  el jugador podrá ejecutar el comando 'quit' para 
+abandonar la partida en curso. 
+
+Modalidades de juego 
+
+Juego nuevo  - Juego tradicional. 
+Juego con bitácora -  Ademas de la manera tradicional de juego,  el jugador
+podrá optar jugar con bitácora lo que  irá registrando en un archivo de texto
+todos los movimientos y puntajes del jugador. 
+Recuperar juego  - Recupera un juego guardado, ya sea con o sin bitácora.

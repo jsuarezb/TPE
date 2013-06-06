@@ -86,8 +86,7 @@ menuNuevo()
 void
 analizarOpcion(int opcion, tJuego * juego)
 {	
-	int i, j;
-	char insAux[81];
+	int i, j, c;
 	FILE * instrucciones;
 	
 	switch (opcion)
@@ -150,13 +149,12 @@ analizarOpcion(int opcion, tJuego * juego)
 		case INSTRUCCIONES:
 			instrucciones = fopen("Instrucciones.txt", "r");
 			
-			while (!feof(instrucciones))
-			{
-				fgets(insAux, 82, instrucciones);
-				printf("%s", insAux);
-			}
-			
-			
+			if (instrucciones == NULL)
+				printf("No se encontro el archivo 'Instrucciones.txt' \n");
+			else
+				while ((c = getc(instrucciones)) != EOF)
+					putchar(c);
+					
 			fclose(instrucciones);
 			break;
 		case TERMINAR:

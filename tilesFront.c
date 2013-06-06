@@ -9,7 +9,7 @@
 #define VALIDAR_AUX(x) ((x) != ' ' && (x) != '\n')
 
 /* Enums */
-enum {JUEGO_NUEVO = 1, JUEGO_BITACORA, RECUPERAR, TERMINAR};
+enum {JUEGO_NUEVO = 1, JUEGO_BITACORA, RECUPERAR, INSTRUCCIONES, TERMINAR};
 enum {ERROR, ELIMINAR, MARTILLAZO, COLUMNA, HILERA, UNDO, SAVE, QUIT};
 
 /* Structs */
@@ -59,7 +59,8 @@ menuNuevo()
 		"(1) Juego nuevo\n",
 		"(2) Juego con bitacora\n",
 		"(3) Recuperar juego\n",
-		"(4) Terminar\n"
+		"(4) Instrucciones de juego\n",
+		"(5) Terminar\n"
 	};
 
 	printf("\n\n");
@@ -69,13 +70,13 @@ menuNuevo()
 	printf("\n\n");
 
 	/* Impresion de menu */
-	for (i = 0; i < 6; i++)
+	for (i = 0; i < 7; i++)
 		printf("%s", txt[i]);
 
 	/* Seleccion de opcion */
 	o = getint("Ingrese el numero de la opcion elegida: ");
 	
-	while (o < 1 || o > 4)
+	while (o < 1 || o > 5)
 		o = getint("Opcion no valida, ingrese la opcion nuevamente: ");
 
 	return o;
@@ -86,6 +87,8 @@ void
 analizarOpcion(int opcion, tJuego * juego)
 {	
 	int i, j;
+	char insAux[81];
+	FILE * instrucciones;
 	
 	switch (opcion)
 	{
@@ -143,6 +146,18 @@ analizarOpcion(int opcion, tJuego * juego)
 				liberarTablero(juego->juegoUndo.tableroUndo, juego->alto);
 			}
 
+			break;
+		case INSTRUCCIONES:
+			instrucciones = fopen("Instrucciones.txt", "r");
+			
+			while (!feof(instrucciones))
+			{
+				fgets(insAux, 82, instrucciones);
+				printf("%s", insAux);
+			}
+			
+			
+			fclose(instrucciones);
 			break;
 		case TERMINAR:
 			printf("Gracias por jugar! Adios!\n");

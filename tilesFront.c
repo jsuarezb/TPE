@@ -152,10 +152,11 @@ analizarOpcion(int opcion, tJuego * juego)
 			if (instrucciones == NULL)
 				printf("No se encontro el archivo 'Instrucciones.txt' \n");
 			else
+			{
 				while ((c = getc(instrucciones)) != EOF)
 					putchar(c);
-					
-			fclose(instrucciones);
+				fclose(instrucciones);
+			}
 			break;
 		case TERMINAR:
 			printf("Gracias por jugar! Adios!\n");

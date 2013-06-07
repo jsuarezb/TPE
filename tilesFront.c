@@ -20,7 +20,7 @@ void pedirDimensiones(tJuego * juego);
 void pedirNiveles(tJuego * juego);
 int menuNuevo(); // Crea menu nuevo y devuelve opcion elegida
 void imprimirTablero(tJuego * juego);
-void analizarOpcion(int opcion, tJuego * juego); 
+void analizarOpcion(int opcion, tJuego * juego); // Actua de acuerdo a la opcion pasada
 void comenzarJuego(); // Comienza el juego
 int recuperar(tJuego * juego);
 int hacerJugada(tJuego * juego);
@@ -137,8 +137,7 @@ analizarOpcion(int opcion, tJuego * juego)
 			break;
 		case RECUPERAR:
 			/* Lectura de entrada para cargar el archivo indicado
-			 * Si fue posible, comienza el juego
-			 * De no ser posible, continua en el menu */
+			 * Si fue posible, comienza el juego, si no, continua en el menu */
 			if (recuperar(juego))
 			{
 				comenzarJuego(juego);
@@ -222,7 +221,6 @@ void
 comenzarJuego(tJuego * juego)
 {
 	int estadoTablero = SEGUIR_JUGANDO, pts = 0, resp = 0, i, j;
-	char posTablero;
 
 	/* Validacion del tablero para seguir jugando */
 	while (estadoTablero != GAME_OVER)
@@ -274,9 +272,7 @@ comenzarJuego(tJuego * juego)
 				for (i = 0; i < juego->alto; i++)
 				{
 					for (j = 0; j < juego->ancho; j++)
-					{
-						posTablero = juego->tablero[i][j];
-						fprintf(juego->bitacora, "%c", posTablero + 'A' - 1);
+						fprintf(juego->bitacora, "%c", juego->tablero[i][j] + 'A' - 1);
 
 					fprintf(juego->bitacora, "\n", NULL);
 				}
@@ -386,7 +382,6 @@ void
 imprimirTablero(tJuego * juego)
 {
 	int i, j;
-	char posTablero;
 
 	printf("Tablero: \n");
 
@@ -410,17 +405,15 @@ imprimirTablero(tJuego * juego)
 
 		/* Imprime los valores del tablero */
 		for (j = 0; j < juego->ancho; j++)
-		{
-			posTablero = juego->tablero[i][j];
-			printf("\033[%dm %c", posTablero + 30, (posTablero > 0) ? posTablero + 'A' - 1 : ' ');
-		}
+			printf("\033[%dm %c", juego->tablero[i][j] + 30, (juego->tablero[i][j] > 0) ?  juego->tablero[i][j] + 'A' - 1 : ' ');
+
 		printf("\033[0m\n");
 	}
 
 }
 
-/* Funcion que compara lo ingresado por stdin con comandos[] y devuelve 
- * si hubo un matcheo exitoso el indice de la palabra, en caso contrario
+/* Funcion que compara lo ingresado por stdin con comandos[] y devuelve si
+ * hubo un matcheo exitoso el indice de la palabra, en caso contrario
  * retorna -1 */
 int
 pedirJugada(char comandos[][5], size_t cantComandos, char args[])
@@ -465,6 +458,7 @@ pedirJugada(char comandos[][5], size_t cantComandos, char args[])
 	/* Compara el comando leído con los comandos del argumento */
 	for (i = 0; i < cantComandos; i++)
 	{
+		/* strcmp devuelve cero cuando ingresas cualquier cosa y te lo toma como un eliminar */
 		if (strcmp(comandos[i], comando) == 0)
 		{
 			free(entrada);
@@ -476,10 +470,8 @@ pedirJugada(char comandos[][5], size_t cantComandos, char args[])
 	return -1;
 }
 
-/* hacerJugada(tJuego * juego) retorna la cantidad de azulejos 
- * eliminados por la jugada elegida o -1 en caso que el usuario ingrese
- * quit */
-  
+/* hacerJugada(tJuego * juego) retorna la cantidad de azulejos eliminados
+ * por la jugada elegida o -1 en caso que el usuario ingrese quit*/
 int
 hacerJugada(tJuego * juego)
 {
@@ -546,8 +538,7 @@ hacerJugada(tJuego * juego)
 	}
 
 	/* Imprime en bitacora si es una jugada a imprimir */
-	if (juego->conBitacora && jugadaValidada >= ELIMINAR 
-							&& jugadaValidada <= UNDO)
+	if (juego->conBitacora && jugadaValidada >= ELIMINAR && jugadaValidada <= UNDO)
 	{
 		if(azulejosEliminados > 0)
 			fprintf(juego->bitacora,"; %d \n", azulejosEliminados);
@@ -561,8 +552,7 @@ hacerJugada(tJuego * juego)
 }
 
 /* Funcion que valida los parametros del comando "e" y
- * ejecuta la funcion eliminar retornando los valores de la jugada
- * hecha */
+ * ejecuta la funcion eliminar retornando los valores de la jugada hecha */
 int
 eliminarWrapper(tJuego * juego, char args[])
 {

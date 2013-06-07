@@ -381,7 +381,7 @@ guardarJuego(char * nombreArchivo,tJuego * juego)
 	fwrite(&juego->alto, sizeof(int), 1, archivo); /* Filas */
 	fwrite(&juego->ancho, sizeof(int), 1, archivo); /* Columnas */
 	fwrite(&juego->nivelMaximo, sizeof(int), 1, archivo);
-	fwrite(&juego->conBitacora, sizeof(char), 1, archivo);
+	fwrite(&juego->conBitacora, sizeof(int), 1, archivo);
 	fwrite(&juego->nivelActual, sizeof(int), 1, archivo);
 	fwrite(&juego->puntos, sizeof(int), 1, archivo);
 	fwrite(&juego->movHileras, sizeof(int), 1, archivo);
@@ -458,7 +458,7 @@ recuperarJuego(FILE * partidaGuardada, tJuego * juego)
 	fread(&juego->alto, sizeof(int), 1, partidaGuardada); /* Filas */
 	fread(&juego->ancho, sizeof(int), 1, partidaGuardada); /* Columnas */
 	fread(&juego->nivelMaximo, sizeof(int), 1, partidaGuardada);
-	fread(&juego->conBitacora, sizeof(char), 1, partidaGuardada);
+	fread(&juego->conBitacora, sizeof(int), 1, partidaGuardada);
 	fread(&juego->nivelActual, sizeof(int), 1, partidaGuardada);
 	fread(&juego->puntos, sizeof(int), 1, partidaGuardada);
 	fread(&juego->movHileras, sizeof(int), 1, partidaGuardada);

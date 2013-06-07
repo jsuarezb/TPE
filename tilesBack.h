@@ -34,7 +34,7 @@ typedef struct
 	int movColumnas;
 	int movMartillazos;
 	int cantJugadas;
-	char conBitacora;
+	int conBitacora;
 	char ** tablero;
 	char nombreJuego[MAX_CHARS];
 	FILE * bitacora;

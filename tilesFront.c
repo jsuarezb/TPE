@@ -479,6 +479,7 @@ hacerJugada(tJuego * juego)
 	char acciones[][5]={"e", "m", "c", "h", "undo", "save", "quit"};
 	char accion[4] = {"emch"};
 	char args[MAX_CHARS] = {0};
+	char resp;
 	int jugadaValidada, azulejosEliminados = 0;
 
 	printf("Ingresar comando:\n");
@@ -525,6 +526,18 @@ hacerJugada(tJuego * juego)
 			guardarWrapper(juego, args);
 			break;
 		case QUIT:
+			printf("Desea guardar el juego? (y/n) \n");
+			do
+				scanf("%c", &resp);
+			while ((resp != 'y') && (resp != 'n'));
+			
+			if (resp == 'y')
+			{
+				printf("Ingrese el nombre para guardar el juego \n");
+				scanf("%s", args);
+				strcat(args, "\n");
+				guardarWrapper(juego, args);
+			}
 			return -1;
 		default:
 			printf("Jugada no reconocida\n");

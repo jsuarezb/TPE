@@ -405,8 +405,7 @@ imprimirTablero(tJuego * juego)
 
 		/* Imprime los valores del tablero */
 		for (j = 0; j < juego->ancho; j++)
-			printf("\033[%dm %c", juego->tablero[i][j] + 30,
-		(juego->tablero[i][j] > 0) ? 178 : ' ');
+			printf("\033[%dm %c", juego->tablero[i][j] + 30, (juego->tablero[i][j] > 0) ?  juego->tablero[i][j] + 'A' - 1 : ' ');
 
 		printf("\033[0m\n");
 	}
@@ -479,7 +478,6 @@ hacerJugada(tJuego * juego)
 	char acciones[][5]={"e", "m", "c", "h", "undo", "save", "quit"};
 	char accion[4] = {"emch"};
 	char args[MAX_CHARS] = {0};
-	char resp;
 	int jugadaValidada, azulejosEliminados = 0;
 
 	printf("Ingresar comando:\n");
@@ -526,12 +524,7 @@ hacerJugada(tJuego * juego)
 			guardarWrapper(juego, args);
 			break;
 		case QUIT:
-			printf("Desea guardar el juego? (y/n) \n");
-			do
-				scanf("%c", &resp);
-			while ((resp != 'y') && (resp != 'n'));
-			
-			if (resp == 'y')
+			if ((yesNo("Desea guardar el juego? (s/n) \n")) == 1)
 			{
 				printf("Ingrese el nombre para guardar el juego \n");
 				scanf("%s", args);
